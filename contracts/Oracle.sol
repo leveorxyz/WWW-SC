@@ -9,7 +9,6 @@ contract Protocol is Ownable{
 
     uint256[] private _buyUSDTxIDs;       
     uint256[] private _sellUSDTxIDs;       
-    uint256[] private _rentUSDTxIDs;       
 
     constructor(address _erc20Address) {
         _erc20 = IERC20(_erc20Address);
@@ -28,7 +27,4 @@ contract Protocol is Ownable{
         _sellUSDTxIDs.push(sellUSDTx);
     }
 
-    function addRentTx(uint256 rentUSDTx) external onlyOwner{
-        _rentUSDTxIDs.push(rentUSDTx);
-    }
 }
