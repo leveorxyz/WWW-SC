@@ -20,15 +20,15 @@ contract Protocol is Ownable{
         _;
     }
 
-    function addBuyTx() external onlyOwner{
-        
+    function addBuyTx(uint256 buyUSDTx) external onlyOwner{
+        _buyUSDTxIDs.push(buyUSDTx);
     }
 
-    function addSellTx() external onlyOwner{
-        
+    function addSellTx(uint256 sellUSDTx) external onlyOwner{
+        _sellUSDTxIDs.push(sellUSDTx);
     }
 
-    function addRentTx() external onlyOwner{
-        
+    function addRentTx(uint256 rentUSDTx) external onlyOwner{
+        _rentUSDTxIDs.push(rentUSDTx);
     }
 }
