@@ -15,6 +15,11 @@ contract Protocol is Ownable{
         _erc20 = IERC20(_erc20Address);
     }
 
+    modifier onlyERC20() {
+        require(msg.sender == address(_erc20));
+        _;
+    }
+
     function addBuyTx() external onlyOwner{
         
     }
