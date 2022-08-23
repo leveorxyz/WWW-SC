@@ -2,14 +2,17 @@
 pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import './interfaces/IERC20.sol';
 
 contract Protocol is Ownable{
+    IERC20 private _erc20;
 
     uint256[] private _buyUSDTxIDs;       
     uint256[] private _sellUSDTxIDs;       
     uint256[] private _rentUSDTxIDs;       
 
-    constructor() {
+    constructor(address _erc20Address) {
+        _erc20 = IERC20(_erc20Address);
     }
 
     function addBuyTx() external onlyOwner{
