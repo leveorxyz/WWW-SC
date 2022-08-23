@@ -12,5 +12,15 @@ contract Protocol is Ownable{
     constructor() {
     }
 
-    
+    function addBuyTx() external onlyOwner{
+        
+    }
+
+    function addSellTx() external onlyOwner{
+        
+    }
+
+    function addRentTx() external onlyOwner{
+        
+    }
 }
