@@ -28,4 +28,6 @@ contract Protocol is Ownable{
       _oracle = IOracle(oracleAddress);
       _oracle.initialize(address(_landingToken));
     }
+
+    
 }

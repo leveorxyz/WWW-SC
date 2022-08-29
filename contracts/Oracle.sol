@@ -8,8 +8,9 @@ contract Oracle is Ownable{
     IERC20 private _erc20;
     address private _protocolAddress;
 
-    uint256[] private _buyUSDTxIDs;       
-    uint256[] private _sellUSDTxIDs;       
+    // txID -> usd amount
+    mapping(uint256 => uint256) private _buyUSDTxIDs;       
+    mapping (uint256 => uint256) private _sellUSDTxIDs;       
 
     constructor(address protocolAddress) {
         _protocolAddress = protocolAddress;
@@ -26,32 +27,43 @@ contract Oracle is Ownable{
         _;
     }
 
-    function addBuyTx(uint256 buyUSDTx) external onlyOwner{
-        _buyUSDTxIDs.push(buyUSDTx);
+    modifier buyUsdTxIDDontExixt(uint256 buyUSDTx) {
+        require(_buyUSDTxIDs[buyUSDTx] != 0, "Buy tx already added");
+        _;
     }
 
-    function addSellTx(uint256 sellUSDTx) external onlyOwner{
-        _sellUSDTxIDs.push(sellUSDTx);
+    modifier sellUsdTxIDDontExixt(uint256 sellUSDTx) {
+        require(_sellUSDTxIDs[sellUSDTx] != 0, "Sell tx already added");
+        _;
     }
 
-    function checkBuyTx(uint256 buyUSDTx) external onlyERC20 returns(bool) {
-        for (uint256 index = 0; index < _buyUSDTxIDs.length; index++) {
-            if (_buyUSDTxIDs[index] == buyUSDTx) {
-                delete _buyUSDTxIDs[index];
-                return true;
-            } 
+    modifier amountNotZero(uint256 amount) {
+        require(amount != 0, "USD amount cant be 0");
+        _;
+    }
+
+    function addBuyTx(uint256 buyUSDTx, uint256 amount) external onlyOwner buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount){
+        _buyUSDTxIDs[buyUSDTx] = amount;
+    }
+
+    function addSellTx(uint256 sellUSDTx, uint256 amount) external onlyOwner sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount){ 
+        _sellUSDTxIDs[sellUSDTx] = amount;
+    }
+
+    function checkBuyTx(uint256 buyUSDTx, uint256 amount) external onlyERC20 buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount) returns(bool) {
+        bool exist =  _buyUSDTxIDs[buyUSDTx] == amount;
+        if(exist){
+            delete _buyUSDTxIDs[buyUSDTx];
         }
-        return false;
+        return exist;
     }
 
-    function checkSellTx(uint256 sellUSDTx) external onlyERC20 returns(bool) {
-        for (uint256 index = 0; index < _sellUSDTxIDs.length; index++) {
-            if (_sellUSDTxIDs[index] == sellUSDTx) {
-                delete _buyUSDTxIDs[index];
-                return true;
-            } 
+    function checkSellTx(uint256 sellUSDTx, uint256 amount) external onlyERC20 sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount) returns(bool) {
+        bool exist = _sellUSDTxIDs[sellUSDTx] == amount;
+        if(exist){
+            delete _sellUSDTxIDs[sellUSDTx];
         }
-        return false;
+        return exist;
     }
 
 }
