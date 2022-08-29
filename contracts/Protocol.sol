@@ -3,10 +3,12 @@ pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import './LandingToken.sol';
+import './interfaces/IOracle.sol';
 
 
 contract Protocol is Ownable{
     LandingToken private _landingToken;
+    IOracle private _oracle;
 
     struct RentDetail{
         uint256 rentAmount;
@@ -21,9 +23,9 @@ contract Protocol is Ownable{
 
     mapping (uint256=>PropertyDetail) private _propertyDetails;
 
-    constructor() {
+    constructor(address oracleAddress) {
       _landingToken = new LandingToken();
-      _oracle = new 
-      _landingToken.transferOwnership(msg.sender);
+      _oracle = IOracle(oracleAddress);
+      _oracle.initialize(address(_landingToken));
     }
 }
