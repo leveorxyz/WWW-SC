@@ -4,14 +4,21 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import './interfaces/IERC20.sol';
 
-contract Protocol is Ownable{
+contract Oracle is Ownable{
     IERC20 private _erc20;
+    address private _protocolAddress;
 
     uint256[] private _buyUSDTxIDs;       
     uint256[] private _sellUSDTxIDs;       
 
-    constructor(address _erc20Address) {
+    constructor(address protocolAddress) {
+        _protocolAddress = protocolAddress;
+    }
+
+    function initialize(address _erc20Address) external {
+        require(msg.sender == _protocolAddress, "Not called by protocol");
         _erc20 = IERC20(_erc20Address);
+        transferOwnership(msg.sender);      
     }
 
     modifier onlyERC20() {

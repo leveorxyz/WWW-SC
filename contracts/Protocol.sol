@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import './LandingToken.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
+import './LandingToken.sol';
+
 
 contract Protocol is Ownable{
-    LandingToken private landingToken;
+    LandingToken private _landingToken;
 
     struct RentDetail{
         uint256 rentAmount;
@@ -21,7 +22,8 @@ contract Protocol is Ownable{
     mapping (uint256=>PropertyDetail) private _propertyDetails;
 
     constructor() {
-      landingToken = new LandingToken();
-      landingToken.transferOwnership(msg.sender);
+      _landingToken = new LandingToken();
+      _oracle = new 
+      _landingToken.transferOwnership(msg.sender);
     }
 }
