@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     constructor() ERC20("Landing Token", "LANDC") {
-        _mint(msg.sender, 1000000000000 * 10 ** decimals());
+        _mint(address(this), 1000000000000 * 10 ** decimals());
     }
 
     function pause() public onlyOwner {
