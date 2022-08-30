@@ -17,6 +17,7 @@ contract Protocol is Ownable{
     struct PropertyDetail{
         bytes imageCID;
         bytes legalDocCID;
+        bool tenantOnborad;
     }
 
     mapping (uint256=>PropertyDetail) private _propertyDetails;
@@ -58,5 +59,7 @@ contract Protocol is Ownable{
         require(usdPaid, "USD not paid");
         _landingToken.sellToken(amount, msg.sender);
     }
+
+  
     
 }
