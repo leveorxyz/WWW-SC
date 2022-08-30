@@ -36,5 +36,12 @@ contract Protocol is Ownable{
         require(usdPaid, "USD not paid");
         _landingToken.buyToken(amount, msg.sender);
     }
+
+    function sellLANDC(uint256 amount, uint256 usdAmount, uint256 txID) external {
+        require(_landingToken.balanceOf(address(msg.sender))>= amount, "Not enough balance");
+        bool usdPaid = _oracle.checkSellTx(txID, usdAmount);
+        require(usdPaid, "USD not paid");
+        _landingToken.sellToken(amount, msg.sender);
+    }
     
 }
