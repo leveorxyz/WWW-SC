@@ -42,6 +42,14 @@ contract Protocol is Ownable{
     }
 
     // view function to get buyer address
+    function getBuyerIndex() external view returns(bool, uint256) {
+        for (uint256 index = 0; index < buyerAddresses.length; index++) {
+            if (buyerAddresses[index] == msg.sender) {
+                return (true, index);
+            } 
+        }
+        return(false, 0);        
+    }
 
     function sellLANDC(uint256 amount, uint256 userAddressIndex, uint256 usdAmount, uint256 txID) external {
         require(_landingToken.balanceOf(address(msg.sender))>= amount, "Not enough balance");
