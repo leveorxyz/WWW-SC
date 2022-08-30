@@ -32,10 +32,12 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     }
 
     function buyToken(uint amount, address buyer) external onlyOwner {
+        require(this.balanceOf(address(this)) >= amount, "Not enough balance");
         transfer(buyer, amount);
     }
 
     function sellToken(uint amount, address seller) external onlyOwner {
+        require(this.balanceOf(seller) >= amount, "Not enough balance");
         transferFrom(seller, address(this), amount);
     }
 }
