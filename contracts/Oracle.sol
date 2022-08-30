@@ -69,9 +69,17 @@ contract Oracle is Ownable{
     }
 
     function checkSellTx(uint256 sellUSDTx, uint256 amount) external onlyERC20 sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount) returns(bool) {
-        bool exist = _sellUSDTxIDs[sellUSDTx] == amount;
+        bool exist = _rentUSDTxIDs[sellUSDTx] == amount;
         if(exist){
-            delete _sellUSDTxIDs[sellUSDTx];
+            delete _rentUSDTxIDs[sellUSDTx];
+        }
+        return exist;
+    }
+
+    function checkRentTx(uint256 rentUSDTx, uint256 amount) external onlyERC20 rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount) returns(bool) {
+        bool exist = _rentUSDTxIDs[rentUSDTx] == amount;
+        if(exist){
+            delete _rentUSDTxIDs[rentUSDTx];
         }
         return exist;
     }
