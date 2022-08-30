@@ -60,6 +60,8 @@ contract Protocol is Ownable{
         _landingToken.sellToken(amount, msg.sender);
     }
 
-  
+    function addProperty(uint256 propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
+        
+    }
     
 }
