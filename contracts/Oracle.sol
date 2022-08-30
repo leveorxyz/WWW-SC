@@ -38,6 +38,11 @@ contract Oracle is Ownable{
         _;
     }
 
+    modifier rentUsdTxIDDontExixt(uint256 sellUSDTx) {
+        require(_sellUSDTxIDs[sellUSDTx] != 0, "Rent tx already added");
+        _;
+    }
+
     modifier amountNotZero(uint256 amount) {
         require(amount != 0, "USD amount cant be 0");
         _;
@@ -51,7 +56,9 @@ contract Oracle is Ownable{
         _sellUSDTxIDs[sellUSDTx] = amount;
     }
 
-    
+    function addRentTx(uint256 rentUSDTx, uint256 amount) external onlyOwner rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount){ 
+        _rentUSDTxIDs[rentUSDTx] = amount;
+    }
 
     function checkBuyTx(uint256 buyUSDTx, uint256 amount) external onlyERC20 buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount) returns(bool) {
         bool exist =  _buyUSDTxIDs[buyUSDTx] == amount;
