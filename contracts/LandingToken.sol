@@ -34,4 +34,8 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     function buyToken(uint amount, address buyer) external onlyOwner {
         
     }
+
+    function sellToken(uint amount, address seller) external onlyOwner {
+        
+    }
 }
