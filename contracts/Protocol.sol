@@ -13,6 +13,7 @@ contract Protocol is Ownable{
     struct RentDetail{
         uint256 rentAmount;
         uint8 month;
+        uint8 year;
     }
 
     struct PropertyDetail{
