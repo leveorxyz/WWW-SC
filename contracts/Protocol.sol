@@ -11,16 +11,12 @@ contract Protocol is Ownable{
     IOracle private _oracle;
     address[] buyerAddresses;
 
-    struct RentDetail{
-        uint256 rentAmount;
-        uint8 month;
-        uint8 year;
-    }
-
+    // string will represent month+year
+    mapping (address => mapping(uint256 => uint256)) totalLandcAllocated;
+    
     struct PropertyDetail{
         bytes imageCID;
         bytes legalDocCID;
-        RentDetail[] rentdetails;
     }
 
     mapping (uint256=>PropertyDetail) private _propertyDetails;
