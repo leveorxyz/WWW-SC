@@ -11,6 +11,7 @@ contract Oracle is Ownable{
     // txID -> usd amount
     mapping(uint256 => uint256) private _buyUSDTxIDs;       
     mapping (uint256 => uint256) private _sellUSDTxIDs;       
+    mapping (uint256 => uint256) private _rentUSDTxIDs;       
 
     constructor(address protocolAddress) {
         _protocolAddress = protocolAddress;
@@ -49,6 +50,8 @@ contract Oracle is Ownable{
     function addSellTx(uint256 sellUSDTx, uint256 amount) external onlyOwner sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount){ 
         _sellUSDTxIDs[sellUSDTx] = amount;
     }
+
+    
 
     function checkBuyTx(uint256 buyUSDTx, uint256 amount) external onlyERC20 buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount) returns(bool) {
         bool exist =  _buyUSDTxIDs[buyUSDTx] == amount;
