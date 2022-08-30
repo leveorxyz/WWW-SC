@@ -9,6 +9,7 @@ import './interfaces/IOracle.sol';
 contract Protocol is Ownable{
     LandingToken private _landingToken;
     IOracle private _oracle;
+    address[] buyerAddresses;
 
     struct RentDetail{
         uint256 rentAmount;
@@ -32,13 +33,23 @@ contract Protocol is Ownable{
 
     function buyLANDC(uint256 amount, uint256 usdAmount, uint256 txID) external {
         require(_landingToken.balanceOf(address(_landingToken))>= amount, "Not enough balance");
+        if(_landingToken.balanceOf(msg.sender) == 0){
+            buyerAddresses.push(msg.sender);
+        }
         bool usdPaid = _oracle.checkBuyTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
         _landingToken.buyToken(amount, msg.sender);
     }
 
-    function sellLANDC(uint256 amount, uint256 usdAmount, uint256 txID) external {
+    // view function to get buyer address
+
+    function sellLANDC(uint256 amount, uint256 userAddressIndex, uint256 usdAmount, uint256 txID) external {
         require(_landingToken.balanceOf(address(msg.sender))>= amount, "Not enough balance");
+        if(_landingToken.balanceOf(msg.sender) == amount){
+            require(buyerAddresses[userAddressIndex] == msg.sender, "Wrong user index");
+            buyerAddresses[userAddressIndex] = buyerAddresses[buyerAddresses.length - 1];
+            buyerAddresses.pop();
+        }
         bool usdPaid = _oracle.checkSellTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
         _landingToken.sellToken(amount, msg.sender);
