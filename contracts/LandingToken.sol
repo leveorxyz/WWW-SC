@@ -28,6 +28,12 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         whenNotPaused
         override
     {
+        if (from != address(this)) {
+            _approve(from, address(this), this.allowance(from, address(this))-amount);
+        } 
+        if(to != address(this)){   
+            _approve(to, address(this), this.allowance(to, address(this))+amount);
+        }
         super._beforeTokenTransfer(from, to, amount);
     }
 
