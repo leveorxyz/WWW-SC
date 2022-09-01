@@ -10,10 +10,15 @@ contract Protocol is Ownable{
     LandingToken private _landingToken;
     IOracle private _oracle;
     address[] buyerAddresses;
+
+   
     
     // address => timestamp => claimable amount
     mapping (address => mapping(uint256 => uint256)) totalLandcAllocated;
     uint256 private _totalClaimable;
+
+    // The timestamp of 12:00 am of the first day of the month 
+    uint256 private _lastTimestampRentDistributed;
     
     
     struct PropertyDetail{
@@ -50,10 +55,11 @@ contract Protocol is Ownable{
         uint256 timestamp
     );
 
-    constructor(address oracleAddress) {
+    constructor(address oracleAddress, uint256 intialTimestamp) {
       _landingToken = new LandingToken();
       _oracle = IOracle(oracleAddress);
       _oracle.initialize(address(_landingToken));
+      _lastTimestampRentDistributed = intialTimestamp; // IMPORTANT TO SET THIS RIGHT
     }
 
     function buyLANDC(uint256 amount, uint256 usdAmount, uint256 txID) external {
