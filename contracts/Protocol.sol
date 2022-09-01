@@ -161,7 +161,7 @@ contract Protocol is Ownable{
     }
 
     function getClaimable(uint256 timestamp) external view returns(uint256){
-        return totalLandcAllocated[msg.sender][timestamp];
+        return totalLandcAllocated[msg.sender][timestamp].hoursClaimable * totalLandcAllocated[msg.sender][timestamp].amountPerHour;
     }
 
     function getTotalSaving() external view onlyOwner returns(uint256) {
