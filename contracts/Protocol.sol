@@ -82,9 +82,12 @@ contract Protocol is Ownable{
 
     function convertUSDRentToLandc(uint256 amount, uint256 usdAmount, uint256 rentTxID) external onlyOwner {
         uint256 mainWaletBalance = _landingToken.balanceOf(address(_landingToken));
+        bool usdPaid = _oracle.checkRentTx(rentTxID, usdAmount);
+        require(usdPaid, "USD not paid");
         if(mainWaletBalance < amount){
             _landingToken.mint(amount - mainWaletBalance);
         }
+        _landingToken.payToProtocol(amount, msg.sender);  
     }
     
 }
