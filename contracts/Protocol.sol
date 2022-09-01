@@ -17,10 +17,9 @@ contract Protocol is Ownable{
     struct PropertyDetail{
         bytes imageCID;
         bytes legalDocCID;
-        bool tenantOnborad;
     }
 
-    mapping (uint256=>PropertyDetail) private _propertyDetails;
+    mapping (uint256=>PropertyDetail) private _properties;
 
     constructor(address oracleAddress) {
       _landingToken = new LandingToken();
@@ -61,7 +60,9 @@ contract Protocol is Ownable{
     }
 
     function addProperty(uint256 propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
-        
+        require(_properties[propertyID].imageCID.length == 0, "Property already exist");
+        _properties[propertyID].imageCID = imageCID;
+        _properties[propertyID].legalDocCID = legalDocCID;
     }
     
 }
