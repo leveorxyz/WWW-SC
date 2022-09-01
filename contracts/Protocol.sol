@@ -29,6 +29,12 @@ contract Protocol is Ownable{
         address rentPayer
     );
 
+    event BuyLANDC(
+        address buyer,
+        uint256 amount,
+        uint256 timestamp
+    );
+
     constructor(address oracleAddress) {
       _landingToken = new LandingToken();
       _oracle = IOracle(oracleAddress);
@@ -43,6 +49,7 @@ contract Protocol is Ownable{
         bool usdPaid = _oracle.checkBuyTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
         _landingToken.buyToken(amount, msg.sender);
+        emit BuyLANDC(msg.sender, amount, block.timestamp);
     }
 
     // view function to get buyer address
