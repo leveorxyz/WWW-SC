@@ -149,6 +149,7 @@ contract Protocol is Ownable{
     function distributePayment(uint256 rentToDistribute, uint256 timestamp) external onlyOwner {
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute, "Not enough balance in protocol contract");       
         uint16 hoursInMonths = getHours(timestamp);
+        require(hoursInMonths != 0, "Timestamp given is incorrect");
         uint256 totalAddress = buyerAddresses.length;
         uint256 eachClaimablePerHour = (rentToDistribute/totalAddress)/uint256(hoursInMonths);
         for (uint256 index = 0; index < totalAddress; index++) {
