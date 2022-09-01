@@ -51,4 +51,8 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     function payToProtocol(uint256 amount, address rentPayer) external onlyOwner{
         transferFrom(rentPayer, msg.sender, amount);
     }
+
+    function getPrice() external view returns(uint256) {
+        return totalSupply() / 1000000000000;
+    }
 }
