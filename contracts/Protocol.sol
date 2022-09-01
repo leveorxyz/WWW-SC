@@ -35,6 +35,12 @@ contract Protocol is Ownable{
         uint256 timestamp
     );
 
+     event SellLANDC(
+        address seller,
+        uint256 amount,
+        uint256 timestamp
+    );
+
     constructor(address oracleAddress) {
       _landingToken = new LandingToken();
       _oracle = IOracle(oracleAddress);
@@ -72,6 +78,7 @@ contract Protocol is Ownable{
         bool usdPaid = _oracle.checkSellTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
         _landingToken.sellToken(amount, msg.sender);
+        emit SellLANDC(msg.sender, amount, block.timestamp);
     }
 
     function addProperty(uint256 _propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
