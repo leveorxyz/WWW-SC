@@ -10,13 +10,9 @@ contract Protocol is Ownable{
     LandingToken private _landingToken;
     IOracle private _oracle;
     address[] buyerAddresses;
-    struct Claim{
-        uint256 amount;
-        uint256 timestamp;
-    }
-
-    // address => year => month => claimable amount
-    mapping (address => mapping(uint16 => mapping(uint8 => Claim))) totalLandcAllocated;
+    
+    // address => timestamp => claimable amount
+    mapping (address => mapping(uint256 => uint256)) totalLandcAllocated;
     uint256 private _totalClaimable;
     
     
@@ -58,16 +54,6 @@ contract Protocol is Ownable{
       _landingToken = new LandingToken();
       _oracle = IOracle(oracleAddress);
       _oracle.initialize(address(_landingToken));
-    }
-
-    modifier checkMonth(uint8 month) {
-        require(month > 0 && month < 13, "Not a month");
-        _;
-    }
-
-    modifier checkYear(uint16 year) {
-        require(year > 2021, "Not a valid year");
-        _;
     }
 
     function buyLANDC(uint256 amount, uint256 usdAmount, uint256 txID) external {
@@ -132,18 +118,19 @@ contract Protocol is Ownable{
         _landingToken.payToProtocol(amount, msg.sender);  
     }
 
-    function distributePayment(uint256 rentToDistribute, uint8 month, uint16 year) external onlyOwner checkMonth(month) checkYear(year) {
+    function distributePayment(uint256 rentToDistribute, uint256 timestamp) external onlyOwner {
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute, "Not enough balance in protocol contract");       
+        require(timestamp > block.timestamp+(1 weeks), "Consider the payment for late payment");
         uint256 totalAddress = buyerAddresses.length;
         uint256 eachClaimable = rentToDistribute/totalAddress;
         for (uint256 index = 0; index < totalAddress; index++) {
-            totalLandcAllocated[buyerAddresses[index]][year][month] += eachClaimable;
+            totalLandcAllocated[buyerAddresses[index]][timestamp] += eachClaimable;
         }
         _totalClaimable += rentToDistribute;
     }
 
-    function getClaimable(uint8 month, uint16 year) external view checkMonth(month) checkYear(year) returns(uint256){
-        return totalLandcAllocated[msg.sender][year][month];
+    function getClaimable(uint256 timestamp) external view returns(uint256){
+        return totalLandcAllocated[msg.sender][timestamp];
     }
 
     function getTotalSaving() external view onlyOwner returns(uint256) {
