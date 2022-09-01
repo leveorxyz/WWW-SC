@@ -73,6 +73,10 @@ contract Protocol is Ownable{
         _properties[_propertyID].legalDocCID = legalDocCID;
     }
 
+    function getProperty(uint256 propertyID) external view returns(PropertyDetail memory) {
+        return _properties[propertyID];
+    }
+
     function payRentLandc(uint256 amount, string memory _date, uint256 _propertyID) external{
         require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
         require(_landingToken.balanceOf(msg.sender) >= amount, "Not enogh balance");
