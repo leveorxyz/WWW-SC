@@ -22,6 +22,13 @@ contract Protocol is Ownable{
 
     mapping (uint256=>PropertyDetail) private _properties;
 
+    event PayLandc(
+        string date, // "month-year" 
+        uint256 propertyID,
+        uint256 amount,
+        address rentPayer
+    );
+
     constructor(address oracleAddress) {
       _landingToken = new LandingToken();
       _oracle = IOracle(oracleAddress);
