@@ -127,7 +127,7 @@ contract Protocol is Ownable{
         _landingToken.payToProtocol(amount, msg.sender);  
     }
 
-    function getHours(uint256 timestamp) internal returns(uint16) {
+    function getHours(uint256 timestamp) internal view returns(uint16) {
         uint256 timeDif = timestamp - _lastTimestampRentDistributed;
         // seconds in a day: 86400 => 86400*31 = 2678400 
         if(timeDif == 2592000){
