@@ -62,7 +62,7 @@ contract Protocol is Ownable{
       _landingToken = new LandingToken();
       _oracle = IOracle(oracleAddress);
       _oracle.initialize(address(_landingToken));
-      _lastTimestampRentDistributed = intialTimestamp; // IMPORTANT TO SET THIS RIGHT
+      _lastTimestampRentDistributed = intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
     }
 
     function buyLANDC(uint256 amount, uint256 usdAmount, uint256 txID) external {
@@ -153,9 +153,11 @@ contract Protocol is Ownable{
         uint256 totalAddress = buyerAddresses.length;
         uint256 eachClaimablePerHour = (rentToDistribute/totalAddress)/uint256(hoursInMonths);
         for (uint256 index = 0; index < totalAddress; index++) {
-            totalLandcAllocated[buyerAddresses[index]][timestamp] = Claim(hoursInMonths, eachClaimablePerHour) ;
+            totalLandcAllocated[buyerAddresses[index]][timestamp].hoursClaimable  = hoursInMonths;
+            totalLandcAllocated[buyerAddresses[index]][timestamp].amountPerHour  = eachClaimablePerHour;
         }
         _totalClaimable += rentToDistribute;
+        _lastTimestampRentDistributed = timestamp;
     }
 
     function getClaimable(uint256 timestamp) external view returns(uint256){
