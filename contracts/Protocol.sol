@@ -11,10 +11,14 @@ contract Protocol is Ownable{
     IOracle private _oracle;
     address[] buyerAddresses;
 
-   
+    event Claim {
+        uint256 amount,
+        uint10 hoursClaimable,
+        uint256 amountPerHour
+    }
     
     // address => timestamp => claimable amount
-    mapping (address => mapping(uint256 => uint256)) totalLandcAllocated;
+    mapping (address => mapping(uint256 => Claim)) totalLandcAllocated;
     uint256 private _totalClaimable;
 
     // The timestamp of 12:00 am of the first day of the month 
