@@ -67,15 +67,17 @@ contract Protocol is Ownable{
         _landingToken.sellToken(amount, msg.sender);
     }
 
-    function addProperty(uint256 propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
-        require(_properties[propertyID].imageCID.length == 0, "Property already exist");
-        _properties[propertyID].imageCID = imageCID;
-        _properties[propertyID].legalDocCID = legalDocCID;
+    function addProperty(uint256 _propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
+        require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
+        _properties[_propertyID].imageCID = imageCID;
+        _properties[_propertyID].legalDocCID = legalDocCID;
     }
 
-    function payRentLandc(uint256 amount) external{
+    function payRentLandc(uint256 amount, string memory _date, uint256 _propertyID) external{
+        require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
         require(_landingToken.balanceOf(msg.sender) >= amount, "Not enogh balance");
         _landingToken.payToProtocol(amount, msg.sender);
+        emit PayLandc(_date, _propertyID, amount, msg.sender);
     }
     
 }
