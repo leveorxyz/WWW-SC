@@ -127,13 +127,32 @@ contract Protocol is Ownable{
         _landingToken.payToProtocol(amount, msg.sender);  
     }
 
+    function getHours(uint256 timestamp) internal returns(uint16) {
+        uint256 timeDif = timestamp - _lastTimestampRentDistributed;
+        // seconds in a day: 86400 => 86400*31 = 2678400 
+        if(timeDif == 2592000){
+            return 720; // 30*24 
+        }
+        else if(timeDif == 2678400){
+            return 744; // 31*24 
+        }
+        else if(timeDif == 2419200){
+            return 672; // 28*24 
+        }
+        else if(timeDif == 2505600){
+            return 696; // 29*24 
+        }
+        return 0;
+    }
+
+    // !!! Timestamp should be 12 am first day of the Month
     function distributePayment(uint256 rentToDistribute, uint256 timestamp) external onlyOwner {
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute, "Not enough balance in protocol contract");       
-        require(timestamp > block.timestamp+(1 weeks), "Consider the payment for late payment");
+        uint16 hoursInMonths = getHours(timestamp);
         uint256 totalAddress = buyerAddresses.length;
-        uint256 eachClaimable = rentToDistribute/totalAddress;
+        uint256 eachClaimablePerHour = (rentToDistribute/totalAddress)/uint256(hoursInMonths);
         for (uint256 index = 0; index < totalAddress; index++) {
-            totalLandcAllocated[buyerAddresses[index]][timestamp] += eachClaimable;
+            totalLandcAllocated[buyerAddresses[index]][timestamp] = Claim(hoursInMonths, eachClaimablePerHour) ;
         }
         _totalClaimable += rentToDistribute;
     }
