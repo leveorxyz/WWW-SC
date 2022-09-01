@@ -80,8 +80,11 @@ contract Protocol is Ownable{
         emit PayLandc(_date, _propertyID, amount, msg.sender);
     }
 
-    function convertUSDRentToLandc(uint256 amount, uint256 rentTxID) external onlyOwner {
-        
+    function convertUSDRentToLandc(uint256 amount, uint256 usdAmount, uint256 rentTxID) external onlyOwner {
+        uint256 mainWaletBalance = _landingToken.balanceOf(address(_landingToken));
+        if(mainWaletBalance < amount){
+            _landingToken.mint(amount - mainWaletBalance);
+        }
     }
     
 }
