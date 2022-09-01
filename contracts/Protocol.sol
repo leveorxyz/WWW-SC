@@ -11,8 +11,9 @@ contract Protocol is Ownable{
     IOracle private _oracle;
     address[] buyerAddresses;
 
-    // string will represent month+year
-    mapping (address => mapping(uint256 => uint256)) totalLandcAllocated;
+    // address => year => month => claimable amount
+    mapping (address => mapping(uint16 => mapping(uint8 => uint256))) totalLandcAllocated;
+    uint256 private _totalClaimable;
     
     
     struct PropertyDetail{
@@ -115,6 +116,12 @@ contract Protocol is Ownable{
             _landingToken.mint(amount - mainWaletBalance);
         }
         _landingToken.payToProtocol(amount, msg.sender);  
+    }
+
+    function distributePayment(uint256 rentToDistribute, uint8 month, uint16 year) external onlyOwner {
+        require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute, "Not enough balance in protocol contract");       
+        uint256 totalAddress = buyerAddresses.length;
+
     }
     
 }
