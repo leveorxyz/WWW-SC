@@ -131,7 +131,11 @@ contract Protocol is Ownable{
     function distributePayment(uint256 rentToDistribute, uint8 month, uint16 year) external onlyOwner checkMonth(month) checkYear(year) {
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute, "Not enough balance in protocol contract");       
         uint256 totalAddress = buyerAddresses.length;
-
+        uint256 eachClaimable = rentToDistribute/totalAddress;
+        for (uint256 index = 0; index < totalAddress; index++) {
+            totalLandcAllocated[buyerAddresses[index]][year][month] += eachClaimable;
+        }
+        _totalClaimable += rentToDistribute;
     }
     
 }
