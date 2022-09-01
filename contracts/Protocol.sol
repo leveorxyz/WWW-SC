@@ -10,9 +10,13 @@ contract Protocol is Ownable{
     LandingToken private _landingToken;
     IOracle private _oracle;
     address[] buyerAddresses;
+    struct Claim{
+        uint256 amount;
+        uint256 timestamp;
+    }
 
     // address => year => month => claimable amount
-    mapping (address => mapping(uint16 => mapping(uint8 => uint256))) totalLandcAllocated;
+    mapping (address => mapping(uint16 => mapping(uint8 => Claim))) totalLandcAllocated;
     uint256 private _totalClaimable;
     
     
@@ -146,6 +150,6 @@ contract Protocol is Ownable{
         return _landingToken.balanceOf(address(this)) - _totalClaimable;
     }
 
-    
+       
     
 }
