@@ -22,7 +22,7 @@ contract Protocol is Ownable{
 
     mapping (uint256=>PropertyDetail) private _properties;
 
-    event PayLandc(
+    event PayLANDC(
         string date, // "month-year" 
         uint256 propertyID,
         uint256 amount,
@@ -88,7 +88,7 @@ contract Protocol is Ownable{
         require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
         require(_landingToken.balanceOf(msg.sender) >= amount, "Not enogh balance");
         _landingToken.payToProtocol(amount, msg.sender);
-        emit PayLandc(_date, _propertyID, amount, msg.sender);
+        emit PayLANDC(_date, _propertyID, amount, msg.sender);
     }
 
     function convertUSDRentToLandc(uint256 amount, uint256 usdAmount, uint256 rentTxID) external onlyOwner {
