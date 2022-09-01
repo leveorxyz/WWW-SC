@@ -23,6 +23,10 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         _mint(address(this), amount);
     }
 
+     function burn(uint256 amount) public virtual onlyOwner override {
+        _burn(address(this), amount);
+    }
+
     function _beforeTokenTransfer(address from, address to, uint256 amount)
         internal
         whenNotPaused
