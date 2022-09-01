@@ -47,4 +47,8 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         require(this.balanceOf(seller) >= amount, "Not enough balance");
         transferFrom(seller, address(this), amount);
     }
+
+    function payToProtocol(uint256 amount, address rentPayer) external onlyOwner{
+        transferFrom(rentPayer, msg.sender, amount);
+    }
 }

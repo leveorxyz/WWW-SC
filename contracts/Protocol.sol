@@ -14,6 +14,7 @@ contract Protocol is Ownable{
     // string will represent month+year
     mapping (address => mapping(uint256 => uint256)) totalLandcAllocated;
     
+    
     struct PropertyDetail{
         bytes imageCID;
         bytes legalDocCID;
@@ -63,6 +64,11 @@ contract Protocol is Ownable{
         require(_properties[propertyID].imageCID.length == 0, "Property already exist");
         _properties[propertyID].imageCID = imageCID;
         _properties[propertyID].legalDocCID = legalDocCID;
+    }
+
+    function payRentLandc(uint256 amount) external{
+        require(_landingToken.balanceOf(msg.sender) >= amount, "Not enogh balance");
+        _landingToken.payToProtocol(amount, msg.sender);
     }
     
 }
