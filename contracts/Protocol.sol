@@ -43,6 +43,12 @@ contract Protocol is Ownable{
         uint256 usdPaid
     );
 
+    event PayRentLANDC(
+        address rentPayer,
+        uint256 amount,
+        uint256 timestamp
+    );
+
     constructor(address oracleAddress) {
       _landingToken = new LandingToken();
       _oracle = IOracle(oracleAddress);
@@ -98,6 +104,7 @@ contract Protocol is Ownable{
         require(_landingToken.balanceOf(msg.sender) >= amount, "Not enogh balance");
         _landingToken.payToProtocol(amount, msg.sender);
         emit PayLANDC(_date, _propertyID, amount, msg.sender);
+        emit PayRentLANDC(msg.sender, amount, block.timestamp);
     }
 
     function convertUSDRentToLandc(uint256 amount, uint256 usdAmount, uint256 rentTxID) external onlyOwner {
