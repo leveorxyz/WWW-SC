@@ -79,5 +79,9 @@ contract Protocol is Ownable{
         _landingToken.payToProtocol(amount, msg.sender);
         emit PayLandc(_date, _propertyID, amount, msg.sender);
     }
+
+    function convertUSDRentToLandc(uint256 amount, uint256 rentTxID) external onlyOwner {
+        
+    }
     
 }
