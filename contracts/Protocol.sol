@@ -177,7 +177,6 @@ contract Protocol is Ownable{
         uint256 totalClaimable;
         if(hoursPassed >= hoursClaimable){     
              totalClaimable =  hoursClaimable*claimablePerHour;      
-            _landingToken.transfer(msg.sender, totalClaimable);
             totalLandcAllocated[msg.sender][timestamp].amountPerHour = 0;
             totalLandcAllocated[msg.sender][timestamp].hoursClaimable = 0;
         }
@@ -186,6 +185,7 @@ contract Protocol is Ownable{
             totalLandcAllocated[msg.sender][timestamp].hoursClaimable -= uint16(hoursPassed);
         }
         _totalClaimable -= totalClaimable;
+         _landingToken.transfer(msg.sender, totalClaimable);
     }    
     
 }
