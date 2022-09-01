@@ -141,5 +141,11 @@ contract Protocol is Ownable{
     function getClaimable(uint8 month, uint16 year) external view checkMonth(month) checkYear(year) returns(uint256){
         return totalLandcAllocated[msg.sender][year][month];
     }
+
+    function getTotalSaving() external view onlyOwner returns(uint256) {
+        return _landingToken.balanceOf(address(this)) - _totalClaimable;
+    }
+
+    
     
 }
