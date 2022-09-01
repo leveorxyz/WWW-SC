@@ -137,5 +137,9 @@ contract Protocol is Ownable{
         }
         _totalClaimable += rentToDistribute;
     }
+
+    function getClaimable(uint8 month, uint16 year) external view checkMonth(month) checkYear(year){
+        return totalLandcAllocated[msg.sender][year][month];
+    }
     
 }
