@@ -32,13 +32,15 @@ contract Protocol is Ownable{
     event BuyLANDC(
         address buyer,
         uint256 amount,
-        uint256 timestamp
+        uint256 timestamp,
+        uint256 usdPaid
     );
 
      event SellLANDC(
         address seller,
         uint256 amount,
-        uint256 timestamp
+        uint256 timestamp,
+        uint256 usdPaid
     );
 
     constructor(address oracleAddress) {
@@ -55,7 +57,7 @@ contract Protocol is Ownable{
         bool usdPaid = _oracle.checkBuyTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
         _landingToken.buyToken(amount, msg.sender);
-        emit BuyLANDC(msg.sender, amount, block.timestamp);
+        emit BuyLANDC(msg.sender, amount, block.timestamp, usdAmount);
     }
 
     // view function to get buyer address
@@ -78,7 +80,7 @@ contract Protocol is Ownable{
         bool usdPaid = _oracle.checkSellTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
         _landingToken.sellToken(amount, msg.sender);
-        emit SellLANDC(msg.sender, amount, block.timestamp);
+        emit SellLANDC(msg.sender, amount, block.timestamp, usdAmount);
     }
 
     function addProperty(uint256 _propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
