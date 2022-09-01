@@ -168,8 +168,24 @@ contract Protocol is Ownable{
         return _landingToken.balanceOf(address(this)) - _totalClaimable;
     }
 
-    function claimLANDC(uint8 month, uint16 year) external{
+    function claimLANDC(uint256 timestamp) external{
+        uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
+        require(claimablePerHour != 0, "No claimable landc");
+        uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
 
+        uint256 hoursPassed = (block.timestamp-timestamp)/3600;
+        uint256 totalClaimable;
+        if(hoursPassed >= hoursClaimable){     
+             totalClaimable =  hoursClaimable*claimablePerHour;      
+            _landingToken.transfer(msg.sender, totalClaimable);
+            totalLandcAllocated[msg.sender][timestamp].amountPerHour = 0;
+            totalLandcAllocated[msg.sender][timestamp].hoursClaimable = 0;
+        }
+        else{
+            totalClaimable = hoursPassed*claimablePerHour;
+            totalLandcAllocated[msg.sender][timestamp].hoursClaimable -= uint16(hoursPassed);
+        }
+        _totalClaimable -= totalClaimable;
     }    
     
 }
