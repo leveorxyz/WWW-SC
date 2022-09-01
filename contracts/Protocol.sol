@@ -56,6 +56,11 @@ contract Protocol is Ownable{
       _oracle.initialize(address(_landingToken));
     }
 
+    modifier checkMonth(uint8 month) {
+        require(month > 0 && month < 13, "Not a month");
+        _;
+    }
+
     function buyLANDC(uint256 amount, uint256 usdAmount, uint256 txID) external {
         require(_landingToken.balanceOf(address(_landingToken))>= amount, "Not enough balance");
         if(_landingToken.balanceOf(msg.sender) == 0){
@@ -118,7 +123,7 @@ contract Protocol is Ownable{
         _landingToken.payToProtocol(amount, msg.sender);  
     }
 
-    function distributePayment(uint256 rentToDistribute, uint8 month, uint16 year) external onlyOwner {
+    function distributePayment(uint256 rentToDistribute, uint8 month, uint16 year) external onlyOwner checkMonth(month) {
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute, "Not enough balance in protocol contract");       
         uint256 totalAddress = buyerAddresses.length;
 
