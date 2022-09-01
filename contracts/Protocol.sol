@@ -11,10 +11,9 @@ contract Protocol is Ownable{
     IOracle private _oracle;
     address[] buyerAddresses;
 
-    event Claim {
-        uint256 amount,
-        uint10 hoursClaimable,
-        uint256 amountPerHour
+    struct Claim {
+        uint16 hoursClaimable;
+        uint256 amountPerHour;
     }
     
     // address => timestamp => claimable amount
