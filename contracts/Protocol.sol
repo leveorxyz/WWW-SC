@@ -150,6 +150,8 @@ contract Protocol is Ownable{
         return _landingToken.balanceOf(address(this)) - _totalClaimable;
     }
 
-       
+    function claimLANDC(uint8 month, uint16 year) external{
+
+    }    
     
 }
