@@ -65,15 +65,20 @@ contract Protocol is Ownable{
       _lastTimestampRentDistributed = intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
     }
 
-    function buyLANDC(uint256 amount, uint256 usdAmount, uint256 txID) external {
+    function buyLANDC(uint256 usdAmount, uint256 txID) external {
+        uint256 priceInWei = _landingToken.getPrice();
+        uint256 amount = priceInWei*usdAmount;
         require(_landingToken.balanceOf(address(_landingToken))>= amount, "Not enough balance");
         if(_landingToken.balanceOf(msg.sender) == 0){
             buyerAddresses.push(msg.sender);
         }
         bool usdPaid = _oracle.checkBuyTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
-        _landingToken.buyToken(amount, msg.sender);
-        emit BuyLANDC(msg.sender, amount, block.timestamp, usdAmount);
+        uint256 burnAmount = amount * 4 /100;
+        uint256 amountTransferred = amount - burnAmount;
+        _landingToken.burn(burnAmount);
+        _landingToken.buyToken(amountTransferred, msg.sender);
+        emit BuyLANDC(msg.sender, amountTransferred, block.timestamp, usdAmount);
     }
 
     // view function to get buyer address
