@@ -91,7 +91,9 @@ contract Protocol is Ownable{
         return(false, 0);        
     }
 
-    function sellLANDC(uint256 amount, uint256 userAddressIndex, uint256 usdAmount, uint256 txID) external {
+    function sellLANDC(uint256 userAddressIndex, uint256 usdAmount, uint256 txID) external {
+        uint256 priceInWei = _landingToken.getPrice();
+        uint256 amount = priceInWei*usdAmount;
         require(_landingToken.balanceOf(address(msg.sender))>= amount, "Not enough balance");
         if(_landingToken.balanceOf(msg.sender) == amount){
             require(buyerAddresses[userAddressIndex] == msg.sender, "Wrong user index");
