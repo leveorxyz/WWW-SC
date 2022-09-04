@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import './interfaces/IERC20.sol';
 
 contract Oracle is Ownable{
-    IERC20 private _erc20;
+
     address private _protocolAddress;
     bool called;
 
@@ -17,16 +17,10 @@ contract Oracle is Ownable{
     constructor() {
     }
 
-    function initialize(address _erc20Address) external {
+    function initialize() external {
         require(!called, "Can initialize only once");
-        _erc20 = IERC20(_erc20Address);
         _protocolAddress = msg.sender;
         called = false;
-    }
-
-    modifier onlyERC20() {
-        require(msg.sender == address(_erc20));
-        _;
     }
 
     modifier buyUsdTxIDDontExixt(uint256 buyUSDTx) {
@@ -61,7 +55,7 @@ contract Oracle is Ownable{
         _rentUSDTxIDs[rentUSDTx] = amount;
     }
 
-    function checkBuyTx(uint256 buyUSDTx, uint256 amount) external onlyERC20 buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount) returns(bool) {
+    function checkBuyTx(uint256 buyUSDTx, uint256 amount) external buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount) returns(bool) {
         bool exist =  _buyUSDTxIDs[buyUSDTx] == amount;
         if(exist){
             delete _buyUSDTxIDs[buyUSDTx];
@@ -69,7 +63,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkSellTx(uint256 sellUSDTx, uint256 amount) external onlyERC20 sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount) returns(bool) {
+    function checkSellTx(uint256 sellUSDTx, uint256 amount) external sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount) returns(bool) {
         bool exist = _rentUSDTxIDs[sellUSDTx] == amount;
         if(exist){
             delete _rentUSDTxIDs[sellUSDTx];
@@ -77,7 +71,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkRentTx(uint256 rentUSDTx, uint256 amount) external onlyERC20 rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount) returns(bool) {
+    function checkRentTx(uint256 rentUSDTx, uint256 amount) external rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount) returns(bool) {
         bool exist = _rentUSDTxIDs[rentUSDTx] == amount;
         if(exist){
             delete _rentUSDTxIDs[rentUSDTx];
