@@ -13,12 +13,10 @@ contract Oracle is Ownable{
     mapping (uint256 => uint256) private _sellUSDTxIDs;       
     mapping (uint256 => uint256) private _rentUSDTxIDs;       
 
-    constructor(address protocolAddress) {
-        _protocolAddress = protocolAddress;
+    constructor() {
     }
 
     function initialize(address _erc20Address) external {
-        require(msg.sender == _protocolAddress, "Not called by protocol");
         _erc20 = IERC20(_erc20Address);
         transferOwnership(msg.sender);      
     }
