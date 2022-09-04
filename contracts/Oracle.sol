@@ -2,7 +2,6 @@
 pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import './interfaces/IERC20.sol';
 
 contract Oracle is Ownable{
 
@@ -21,6 +20,12 @@ contract Oracle is Ownable{
         require(!called, "Can initialize only once");
         _protocolAddress = msg.sender;
         called = false;
+    }
+
+    modifier onlyProtocolAddress() {
+        require(msg.sender != address(0), "Can not be empty address");
+        require(msg.sender == _protocolAddress, "Only called by protocol address");
+        _;
     }
 
     modifier buyUsdTxIDDontExixt(uint256 buyUSDTx) {
@@ -55,7 +60,7 @@ contract Oracle is Ownable{
         _rentUSDTxIDs[rentUSDTx] = amount;
     }
 
-    function checkBuyTx(uint256 buyUSDTx, uint256 amount) external buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount) returns(bool) {
+    function checkBuyTx(uint256 buyUSDTx, uint256 amount) external onlyProtocolAddress buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount) returns(bool) {
         bool exist =  _buyUSDTxIDs[buyUSDTx] == amount;
         if(exist){
             delete _buyUSDTxIDs[buyUSDTx];
@@ -63,7 +68,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkSellTx(uint256 sellUSDTx, uint256 amount) external sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount) returns(bool) {
+    function checkSellTx(uint256 sellUSDTx, uint256 amount) external onlyProtocolAddress sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount) returns(bool) {
         bool exist = _rentUSDTxIDs[sellUSDTx] == amount;
         if(exist){
             delete _rentUSDTxIDs[sellUSDTx];
@@ -71,7 +76,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkRentTx(uint256 rentUSDTx, uint256 amount) external rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount) returns(bool) {
+    function checkRentTx(uint256 rentUSDTx, uint256 amount) external onlyProtocolAddress rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount) returns(bool) {
         bool exist = _rentUSDTxIDs[rentUSDTx] == amount;
         if(exist){
             delete _rentUSDTxIDs[rentUSDTx];
