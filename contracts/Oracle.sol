@@ -7,6 +7,7 @@ import './interfaces/IERC20.sol';
 contract Oracle is Ownable{
     IERC20 private _erc20;
     address private _protocolAddress;
+    bool called;
 
     // txID -> usd amount
     mapping(uint256 => uint256) private _buyUSDTxIDs;       
@@ -17,8 +18,10 @@ contract Oracle is Ownable{
     }
 
     function initialize(address _erc20Address) external {
+        require(!called, "Can initialize only once");
         _erc20 = IERC20(_erc20Address);
-        transferOwnership(msg.sender);      
+        _protocolAddress = msg.sender;
+        called = false;
     }
 
     modifier onlyERC20() {
