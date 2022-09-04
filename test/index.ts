@@ -16,13 +16,15 @@ describe("Greeter test", function () {
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshopt in every test.
   async function deployOnceFixture() {
-    let greeter: Greeter;
+    let landingToken: LandingToken;
+    let oracle: LandingToken;
+    let protocol: Protocol;
     // Contracts are deployed using the first signer/account by default
     const [owner, ...otherAccounts] = await ethers.getSigners();
 
-    greeter = (await deployContract(owner, GreeterArtifact, ['Hello, world!'])) as Greeter;
-
-    return { greeter, owner, otherAccounts };
+    landingToken = (await deployContract(owner, LandingTokenArtifacts, ['Hello, world!'])) as LandingToken;
+  
+    return { landingToken, owner, otherAccounts };
   }
 
   describe("Test suite", function () {
