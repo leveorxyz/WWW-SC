@@ -2,8 +2,12 @@ import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers, waffle} from 'hardhat';
-import GreeterArtifact from '../artifacts/contracts/Greeter.sol/Greeter.json';
-import {Greeter} from '../typechain/Greeter';
+import LandingTokenArtifacts from '../artifacts/contracts/LandingToken.sol/LandingToken.json';
+import {LandingToken} from '../typechain/contracts/LandingToken';
+import OracleArtifacts from '../artifacts/contracts/Oracle.sol/Oracle.json';
+import {Oracle} from '../typechain/contracts/Oracle';
+import ProtocolArtifacts from '../artifacts/contracts/Protocol.sol/Protocol.json';
+import {Protocol} from '../typechain/contracts/Protocol';
 
 const {deployContract} = waffle;
 
