@@ -65,6 +65,10 @@ contract Protocol is Ownable{
       _lastTimestampRentDistributed = intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
     }
 
+    function getLandingTokenAddress() public view returns(address) {
+        return address(_landingToken);
+    }
+
     function buyLANDC(uint256 usdAmount, uint256 txID) external {
         uint256 priceInWei = _landingToken.getPrice();
         uint256 amount = priceInWei*usdAmount;
