@@ -36,27 +36,36 @@ describe("Landing token test suite", function () {
   }
 
   describe("Test suite", function () {
+
+   const getBalance = async (tokenContract: LandingToken, address: string) => {
+     return Number(await tokenContract.balanceOf(address))/ 10**18;
+   }
     it("Should initial price be 1", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const price = Number(await landingToken.getPrice()) / (10**18);
       expect(price).to.eq(1);
     });
 
-    it.only("Should initial supply be be 1000000000000", async function () {
+    it("Should initial supply be be 1000000000000", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const supply = Number(await landingToken.totalSupply()) / (10**18);
       expect(supply).to.eq(1000000000000);
     });
 
-    it("Should buy landc", async function () {
-      const {  protocol, oracle } = await loadFixture(deployOnceFixture);
+    it.only("Should buy landc", async function () {
+      const { owner, protocol, oracle, landingToken } = await loadFixture(deployOnceFixture);
       let txID = 42575788;
       let usdAmount = 100;
+ 
+      expect(await getBalance(landingToken, owner.address)).to.eq(0);
+      expect(await getBalance(landingToken, landingToken.address)).to.eq(1000000000000);
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
       tx = await protocol.buyLANDC(usdAmount, txID);
       await tx.wait();
-
+      console.log(await getBalance(landingToken, owner.address));
+      console.log(await getBalance(landingToken, landingToken.address));
+      
       expect(1).to.equal(1);
     });
 

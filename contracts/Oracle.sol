@@ -29,17 +29,17 @@ contract Oracle is Ownable{
     }
 
     modifier buyUsdTxIDDontExixt(uint256 buyUSDTx) {
-        require(_buyUSDTxIDs[buyUSDTx] != 0, "Buy tx already added");
+        require(_buyUSDTxIDs[buyUSDTx] == 0, "Buy tx already added");
         _;
     }
 
     modifier sellUsdTxIDDontExixt(uint256 sellUSDTx) {
-        require(_sellUSDTxIDs[sellUSDTx] != 0, "Sell tx already added");
+        require(_sellUSDTxIDs[sellUSDTx] == 0, "Sell tx already added");
         _;
     }
 
-    modifier rentUsdTxIDDontExixt(uint256 sellUSDTx) {
-        require(_sellUSDTxIDs[sellUSDTx] != 0, "Rent tx already added");
+    modifier rentUsdTxIDDontExixt(uint256 rentUSDTx) {
+        require(_rentUSDTxIDs[rentUSDTx] != 0, "Rent tx already added");
         _;
     }
 
@@ -60,7 +60,7 @@ contract Oracle is Ownable{
         _rentUSDTxIDs[rentUSDTx] = amount;
     }
 
-    function checkBuyTx(uint256 buyUSDTx, uint256 amount) external onlyProtocolAddress buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount) returns(bool) {
+    function checkBuyTx(uint256 buyUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
         bool exist =  _buyUSDTxIDs[buyUSDTx] == amount;
         if(exist){
             delete _buyUSDTxIDs[buyUSDTx];
@@ -68,7 +68,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkSellTx(uint256 sellUSDTx, uint256 amount) external onlyProtocolAddress sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount) returns(bool) {
+    function checkSellTx(uint256 sellUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
         bool exist = _rentUSDTxIDs[sellUSDTx] == amount;
         if(exist){
             delete _rentUSDTxIDs[sellUSDTx];
@@ -76,7 +76,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkRentTx(uint256 rentUSDTx, uint256 amount) external onlyProtocolAddress rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount) returns(bool) {
+    function checkRentTx(uint256 rentUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
         bool exist = _rentUSDTxIDs[rentUSDTx] == amount;
         if(exist){
             delete _rentUSDTxIDs[rentUSDTx];

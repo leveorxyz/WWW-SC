@@ -78,8 +78,8 @@ contract Protocol is Ownable{
         }
         bool usdPaid = _oracle.checkBuyTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
-        uint256 burnAmount = amount * 4 /100;
-        uint256 amountTransferred = amount - burnAmount;
+        uint256 burnAmount = ((amount * 4)/100);
+        uint256 amountTransferred = amount-burnAmount;
         _landingToken.burn(burnAmount);
         _landingToken.buyToken(amountTransferred, msg.sender);
         emit BuyLANDC(msg.sender, amountTransferred, block.timestamp, usdAmount);
