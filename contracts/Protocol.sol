@@ -135,7 +135,7 @@ contract Protocol is Ownable{
         if(mainWaletBalance < amount){
             _landingToken.mint(amount - mainWaletBalance);
         }
-        _landingToken.payToProtocol(amount, msg.sender);  
+        _landingToken.transfer(address(this), amount);  
     }
 
     function getHours(uint256 timestamp) internal view returns(uint16) {

@@ -69,10 +69,9 @@ describe("Landing token test suite", function () {
       await tx.wait();
       tx = await protocol.buyLANDC(usdAmount, txID);
       await tx.wait();
-      console.log(await getBalance(landingToken, owner.address));
-      console.log(await getBalance(landingToken, landingToken.address));
-      
-      expect(1).to.equal(1);
+      expect(await getBalance(landingToken, owner.address)).to.eq(96);
+      expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
+
     });
 
 
