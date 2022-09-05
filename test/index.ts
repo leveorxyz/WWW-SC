@@ -66,7 +66,9 @@ describe("Landing token test suite", function () {
       const { owner, protocol, oracle, landingToken } = await loadFixture(deployOnceFixture);
       let txID = 42575788;
       let usdAmount = 100;
- 
+      
+      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(0);
+      
       expect(await getBalance(landingToken, owner.address)).to.eq(0);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(1000000000000);
       let tx = await oracle.addBuyTx(txID, usdAmount);
@@ -75,7 +77,7 @@ describe("Landing token test suite", function () {
       await tx.wait();
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
-
+      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
     });
 
 
