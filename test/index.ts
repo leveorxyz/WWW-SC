@@ -52,7 +52,13 @@ describe("Landing token test suite", function () {
       expect(supply).to.eq(1000000000000);
     });
 
-    it.only("Should buy landc", async function () {
+    it.only("Should initial allowance for protocol from token contract be 1000000000000", async function () {
+      const { landingToken, protocol } = await loadFixture(deployOnceFixture);
+      const allowance = Number(await landingToken.allowance(landingToken.address, protocol.address)) / (10**18);
+      expect(allowance).to.eq(1000000000000);
+    });
+
+    it("Should buy landc", async function () {
       const { owner, protocol, oracle, landingToken } = await loadFixture(deployOnceFixture);
       let txID = 42575788;
       let usdAmount = 100;
