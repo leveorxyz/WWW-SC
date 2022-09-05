@@ -36,14 +36,21 @@ describe("Landing token test suite", function () {
   }
 
   describe("Test suite", function () {
-    it.only("Check initial price", async function () {
+    it.only("Should initial price be 1", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const price = Number(await landingToken.getPrice()) / (10**18);
       expect(price).to.eq(1);
     });
 
-    it("Test 2", async function () {
-      const {  owner } = await loadFixture(deployOnceFixture);
+    it("Should buy landc", async function () {
+      const {  protocol, oracle } = await loadFixture(deployOnceFixture);
+      let txID = 42575788;
+      let usdAmount = 100;
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await protocol.buyLANDC(usdAmount, txID);
+      await tx.wait();
+
       expect(1).to.equal(1);
     });
 
