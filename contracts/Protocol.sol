@@ -61,7 +61,7 @@ contract Protocol is Ownable{
     constructor(address oracleAddress, uint256 intialTimestamp) {
       _landingToken = new LandingToken();
       _oracle = IOracle(oracleAddress);
-      _oracle.initialize(address(_landingToken));
+      _oracle.initialize();
       _lastTimestampRentDistributed = intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
     }
 

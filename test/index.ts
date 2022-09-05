@@ -12,7 +12,7 @@ import { LandingToken__factory } from '../typechain/factories/contracts/LandingT
 
 const {deployContract} = waffle;
 
-describe("Greeter test", function () {
+describe("Landing token test suite", function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshopt in every test.
@@ -24,17 +24,22 @@ describe("Greeter test", function () {
     // Contracts are deployed using the first signer/account by default
     const [owner, ...otherAccounts] = await ethers.getSigners();
 
-    oracle = (await deployContract(owner, LandingTokenArtifacts)) as Oracle;
-    protocol = (await deployContract(owner, LandingTokenArtifacts, [oracle.address, initTimestamp])) as Protocol;
+    oracle = (await deployContract(owner, OracleArtifacts)) as Oracle;
+    protocol = (await deployContract(owner, ProtocolArtifacts, [oracle.address, initTimestamp])) as Protocol;
     landingToken = LandingToken__factory.connect(await protocol.getLandingTokenAddress(), owner) as LandingToken;
+  
+    console.log(oracle.address);
+    console.log(protocol.address);
+    console.log(landingToken.address);
     
-    return {  owner, otherAccounts, protocol, landingToken, oracle };
+    return {  owner, otherAccounts, oracle, protocol, landingToken };
   }
 
   describe("Test suite", function () {
-    it("Test 1", async function () {
-      const { owner } = await loadFixture(deployOnceFixture);
-      expect(true);
+    it.only("Check initial price", async function () {
+      const { landingToken } = await loadFixture(deployOnceFixture);
+      const price = Number(await landingToken.getPrice()) / (10**18);
+      expect(price).to.eq(1);
     });
 
     it("Test 2", async function () {

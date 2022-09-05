@@ -45,6 +45,6 @@
     "deploy:mainnet": "npx hardhat run --network mainnet scripts/deploy.ts",
     "deploy:bsctest": "npx hardhat run --network kovan scripts/deploy.ts",
     "deploy:bscmain": "npx hardhat run --network bscmain scripts/deploy.ts",
-    "test": "TS_NODE_TRANSPILE_ONLY=1 npx hardhat test"
+    "test": "npx hardhat test"
   }
 }
