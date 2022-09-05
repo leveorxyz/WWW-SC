@@ -28,18 +28,24 @@ describe("Landing token test suite", function () {
     protocol = (await deployContract(owner, ProtocolArtifacts, [oracle.address, initTimestamp])) as Protocol;
     landingToken = LandingToken__factory.connect(await protocol.getLandingTokenAddress(), owner) as LandingToken;
   
-    console.log(oracle.address);
-    console.log(protocol.address);
-    console.log(landingToken.address);
+    // console.log(oracle.address);
+    // console.log(protocol.address);
+    // console.log(landingToken.address);
     
     return {  owner, otherAccounts, oracle, protocol, landingToken };
   }
 
   describe("Test suite", function () {
-    it.only("Should initial price be 1", async function () {
+    it("Should initial price be 1", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const price = Number(await landingToken.getPrice()) / (10**18);
       expect(price).to.eq(1);
+    });
+
+    it.only("Should initial supply be be 1000000000000", async function () {
+      const { landingToken } = await loadFixture(deployOnceFixture);
+      const supply = Number(await landingToken.totalSupply()) / (10**18);
+      expect(supply).to.eq(1000000000000);
     });
 
     it("Should buy landc", async function () {
