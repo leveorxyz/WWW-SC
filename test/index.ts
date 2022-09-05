@@ -40,6 +40,10 @@ describe("Landing token test suite", function () {
    const getBalance = async (tokenContract: LandingToken, address: string) => {
      return Number(await tokenContract.balanceOf(address))/ 10**18;
    }
+
+   const getAllowance = async (tokenContract: LandingToken, ownerAddress: string, spenderAddress: string) => {
+    return Number(await tokenContract.allowance(ownerAddress, spenderAddress))/ 10**18;
+  }
     it("Should initial price be 1", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const price = Number(await landingToken.getPrice()) / (10**18);
