@@ -80,7 +80,53 @@ describe("Landing token test suite", function () {
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
     });
 
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
 
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
+
+    it("Should ", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+    });
 
   });
 
