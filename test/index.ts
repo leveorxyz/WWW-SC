@@ -162,19 +162,22 @@ describe("Landing token test suite", function () {
       tx = await protocol.buyLANDC(usdAmount, txID);
       await tx.wait();
 
+      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
 
       let rentPaid =  ethers.utils.parseUnits("50", "ether");
       tx = await  protocol.payRentLandc(rentPaid, 1661990400, propertyID);
       await tx.wait();
-
+      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(46);
+     
       expect(await getBalance(landingToken, owner.address)).to.eq(46);
       expect(await getBalance(landingToken, protocol.address)).to.eq(50);
     });
 
-    it("Should ", async function () {
+    it("Should convert usd to landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+
     });
 
     it("Should ", async function () {
