@@ -95,6 +95,8 @@ describe("Landing token test suite", function () {
       await tx.wait();
       tx = await protocol.buyLANDC(usdAmount, txID);
       await tx.wait();
+      console.log(await getAllowance(landingToken, owner.address, protocol.address));
+      
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       
@@ -103,6 +105,9 @@ describe("Landing token test suite", function () {
       await tx.wait();
       tx = await protocol.sellLANDC(1, usdAmount, txID);
       await tx.wait();
+      console.log(await getAllowance(landingToken, owner.address, protocol.address));
+
+      console.log(await getAllowance(landingToken, owner.address, protocol.address));
 
       expect(await getBalance(landingToken, owner.address)).to.eq(5.999999999640001);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
