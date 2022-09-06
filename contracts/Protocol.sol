@@ -160,6 +160,7 @@ contract Protocol is Ownable{
     // !!! Timestamp should be 12 am first day of the Month
     function distributePayment(uint256 rentToDistribute, uint256 maintainiaceAmount, uint256 timestamp) external onlyOwner {
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute+maintainiaceAmount, "Not enough balance in protocol contract");       
+        require(block.timestamp>timestamp, "Month have not past");
         uint16 hoursInMonths = getHours(timestamp);
         require(hoursInMonths != 0, "Timestamp given is incorrect");
         uint256 totalAddress = buyerAddresses.length;
@@ -186,8 +187,26 @@ contract Protocol is Ownable{
         return _maintenanceVaultAmount;
     }
 
-    function getClaimable(uint256 timestamp) external view returns(uint256){
+    function getTotalClaimableInMonth(uint256 timestamp) external view returns(uint256){
         return totalLandcAllocated[msg.sender][timestamp].hoursClaimable * totalLandcAllocated[msg.sender][timestamp].amountPerHour;
+    }
+
+    function getClaimable(uint256 timestamp) public view returns(uint256) {
+        uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
+        if(claimablePerHour == 0){
+            return 0;
+        }
+        uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
+        require(block.timestamp>timestamp, "Month have not past");
+        uint256 hoursPassed = (block.timestamp-timestamp)/3600;
+        uint256 totalClaimable = 0;
+        if(hoursPassed >= hoursClaimable){     
+             totalClaimable =  hoursClaimable*claimablePerHour;      
+        }
+        else{
+            totalClaimable = hoursPassed*claimablePerHour;
+        }
+        return totalClaimable;
     }
 
     function getTotalSaving() external view onlyOwner returns(uint256) {
@@ -198,7 +217,7 @@ contract Protocol is Ownable{
         uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
         require(claimablePerHour != 0, "No claimable landc");
         uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
-
+        require(block.timestamp>timestamp, "Month have not past");
         uint256 hoursPassed = (block.timestamp-timestamp)/3600;
         uint256 totalClaimable;
         if(hoursPassed >= hoursClaimable){     

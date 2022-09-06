@@ -17,7 +17,7 @@ describe("Landing token test suite", function () {
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshopt in every test.
   async function deployOnceFixture() {
-    const initTimestamp: number = 1661990400; // UTC timestamp, Sept 1st, 2022, 12:00 am 
+    const initTimestamp: number = 1659312000; // UTC timestamp, Sept 1st, 2022, 12:00 am 
     let landingToken: LandingToken;
     let oracle: Oracle;
     let protocol: Protocol;
@@ -57,17 +57,19 @@ describe("Landing token test suite", function () {
       return str;
     }
 
-   const getBalance = async (tokenContract: LandingToken, address: string) => {
+  const getBalance = async (tokenContract: LandingToken, address: string) => {
      return Number(await tokenContract.balanceOf(address))/ 10**18;
    }
 
-   const getPrice = async (tokenContract: LandingToken) => {
+  const getPrice = async (tokenContract: LandingToken) => {
     return Number(await tokenContract.getPrice())/ 10**18;
   }
 
-   const getAllowance = async (tokenContract: LandingToken, ownerAddress: string, spenderAddress: string) => {
+  const getAllowance = async (tokenContract: LandingToken, ownerAddress: string, spenderAddress: string) => {
     return Number(await tokenContract.allowance(ownerAddress, spenderAddress))/ 10**18;
   }
+
+  
     it("Should initial price be 1", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const price = Number(await landingToken.getPrice()) / (10**18);
@@ -222,6 +224,28 @@ describe("Landing token test suite", function () {
       await tx.wait();
       expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992);
       
+      const distributionAmount =  ethers.utils.parseUnits("98", "ether");
+      const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
+      const oct1stTimestamp = 1661990400;
+
+      expect(Number(await protocol.getClaimable(1661990400))/10**18).to.eq(0);
+      expect(Number(await protocol.connect(account2).getClaimable(1661990400))/10**18).to.eq(0);  
+   
+
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, oct1stTimestamp);
+      await tx.wait();
+
+      expect(Number(await protocol.getClaimable(1661990400))/10**18).to.eq(9.286290322580646);
+      expect(Number(await protocol.connect(account2).getClaimable(1661990400))/10**18).to.eq(9.286290322580646);  
+      expect(Number(await protocol.getTotalClaimableInMonth(1661990400))/10**18).to.eq(49);
+      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(1661990400))/10**18).to.eq(49);     
+
+      // expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992-99);
+      // expect(await getBalance(landingToken, owner.address)).to.eq(96+48);
+      // expect(await getBalance(landingToken, account2.address)).to.eq(95.999999999616+48);
+
+
+
     });
 
     it("Should ", async function () {
