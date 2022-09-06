@@ -114,8 +114,16 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
-    it("Should ", async function () {
+    it("Should pay rent in landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await protocol.buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+
     });
 
     it("Should ", async function () {
