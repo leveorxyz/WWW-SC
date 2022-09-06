@@ -38,6 +38,25 @@ describe("Landing token test suite", function () {
 
   describe("Test suite", function () {
 
+    function strToUtf16Bytes(str: string) {
+      const bytes = [];
+      for (let index = 0; index < str.length; index++) {
+        const code = str.charCodeAt(index); // x00-xFFFF
+        bytes.push(code & 255, code >> 8); // low, high
+      }
+      return bytes;
+    }
+
+    function hex_to_ascii(str1: { toString: () => any; })
+    {
+      var hex  = str1.toString();
+      var str = '';
+      for (var n = 0; n < hex.length; n += 2) {
+        str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+      }
+      return str;
+    }
+
    const getBalance = async (tokenContract: LandingToken, address: string) => {
      return Number(await tokenContract.balanceOf(address))/ 10**18;
    }
@@ -88,7 +107,7 @@ describe("Landing token test suite", function () {
       
     });
 
-    it.only("Should sell token", async function () {
+    it("Should sell token", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -113,6 +132,21 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, owner.address)).to.eq(5.999999999640001);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
+
+    it.only("Should add new property", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const propertyID = 43947893;
+      const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
+      const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
+      let tx = await protocol.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
+      await tx.wait();
+      const propertyDetails = await protocol.getProperty(propertyID);
+      let resImageID = hex_to_ascii(propertyDetails[0]).toString().replace(/[^\w\s]/gi, '');
+      let resDocID = hex_to_ascii(propertyDetails[1]).toString().replace(/[^\w\s]/gi, '');
+      expect(resImageID).to.eq(imageID);
+      expect(resDocID).to.eq(legalDocID);
+    });
+
 
     it("Should pay rent in landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
