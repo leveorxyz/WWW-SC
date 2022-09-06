@@ -9,9 +9,9 @@ contract Oracle is Ownable{
     bool called;
 
     // txID -> usd amount
-    mapping(uint256 => uint256) private _buyUSDTxIDs;       
-    mapping (uint256 => uint256) private _sellUSDTxIDs;       
-    mapping (uint256 => uint256) private _rentUSDTxIDs;       
+    mapping(string => uint256) private _buyUSDTxIDs;       
+    mapping (string => uint256) private _sellUSDTxIDs;       
+    mapping (string => uint256) private _rentUSDTxIDs;       
 
     constructor() {
     }
@@ -28,17 +28,17 @@ contract Oracle is Ownable{
         _;
     }
 
-    modifier buyUsdTxIDDontExixt(uint256 buyUSDTx) {
-        require(_buyUSDTxIDs[buyUSDTx] == 0, "Buy tx already added");
+    modifier buyUsdTxIDDontExixt(string memory buyUSDTx) {
+        require(_buyUSDTxIDs[buyUSDTx] != 0, "Buy tx already added");
         _;
     }
 
-    modifier sellUsdTxIDDontExixt(uint256 sellUSDTx) {
+    modifier sellUsdTxIDDontExixt(string memory sellUSDTx) {
         require(_sellUSDTxIDs[sellUSDTx] == 0, "Sell tx already added");
         _;
     }
 
-    modifier rentUsdTxIDDontExixt(uint256 rentUSDTx) {
+    modifier rentUsdTxIDDontExixt(string memory rentUSDTx) {
         require(_rentUSDTxIDs[rentUSDTx] != 0, "Rent tx already added");
         _;
     }
@@ -48,19 +48,19 @@ contract Oracle is Ownable{
         _;
     }
 
-    function addBuyTx(uint256 buyUSDTx, uint256 amount) external onlyOwner buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount){
+    function addBuyTx(string memory buyUSDTx, uint256 amount) external onlyOwner buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount){
         _buyUSDTxIDs[buyUSDTx] = amount;
     }
 
-    function addSellTx(uint256 sellUSDTx, uint256 amount) external onlyOwner sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount){ 
+    function addSellTx(string memory sellUSDTx, uint256 amount) external onlyOwner sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount){ 
         _sellUSDTxIDs[sellUSDTx] = amount;
     }
 
-    function addRentTx(uint256 rentUSDTx, uint256 amount) external onlyOwner rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount){ 
+    function addRentTx(string memory rentUSDTx, uint256 amount) external onlyOwner rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount){ 
         _rentUSDTxIDs[rentUSDTx] = amount;
     }
 
-    function checkBuyTx(uint256 buyUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
+    function checkBuyTx(string memory buyUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
         bool exist =  _buyUSDTxIDs[buyUSDTx] == amount;
         if(exist){
             delete _buyUSDTxIDs[buyUSDTx];
@@ -68,7 +68,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkSellTx(uint256 sellUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
+    function checkSellTx(string memory sellUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
         bool exist = _sellUSDTxIDs[sellUSDTx] == amount;
         if(exist){
             delete _sellUSDTxIDs[sellUSDTx];
@@ -76,7 +76,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkRentTx(uint256 rentUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
+    function checkRentTx(string memory rentUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
         bool exist = _rentUSDTxIDs[rentUSDTx] == amount;
         if(exist){
             delete _rentUSDTxIDs[rentUSDTx];
