@@ -7,9 +7,12 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
+
+    uint256 intialMint = 1000000000000;
     constructor() ERC20("Landing Token", "LANDC") {
-        _mint(address(this), 1000000000000 * (10 ** decimals()));
-        _approve(address(this), msg.sender, 1000000000000 * (10 ** decimals()));
+        intialMint = 1000000000000;
+        _mint(address(this), intialMint * (10 ** decimals()));
+        _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
     }
 
     function pause() public onlyOwner {
@@ -21,6 +24,8 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     }
 
     function mint(uint256 amount) public onlyOwner {
+        intialMint += amount;
+        _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
         _mint(address(this), amount);
     }
 
@@ -64,6 +69,6 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     }
 
     function getPrice() external view returns(uint256) {
-        return (1000000000000 * 10 ** decimals())/(totalSupply()/ 10 ** decimals());
+        return (intialMint * 10 ** decimals())/(totalSupply()/ 10 ** decimals());
     }
 }
