@@ -129,14 +129,16 @@ contract Protocol is Ownable{
         emit PayRentLANDC(msg.sender, _propertyID, amount, _date, block.timestamp);
     }
 
-    function convertUSDRentToLandc(uint256 amount, uint256 usdAmount, string memory rentTxID) external onlyOwner {
+    function convertUSDRentToLandc(uint256 usdAmount, string memory rentTxID) external onlyOwner {
         uint256 mainWaletBalance = _landingToken.balanceOf(address(_landingToken));
+        
         bool usdPaid = _oracle.checkRentTx(rentTxID, usdAmount);
         require(usdPaid, "USD not paid");
+        uint256 amount = _landingToken.getPrice()*usdAmount;
         if(mainWaletBalance < amount){
             _landingToken.mint(amount - mainWaletBalance);
         }
-        _landingToken.transfer(address(this), amount);  
+        _landingToken.transferFrom(address(_landingToken), address(this), amount);  
     }
 
     function getHours(uint256 timestamp) internal view returns(uint16) {

@@ -148,7 +148,7 @@ describe("Landing token test suite", function () {
     });
 
 
-    it.only("Should pay rent in landc", async function () {
+    it("Should pay rent in landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       const propertyID = 43947893;
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
@@ -175,9 +175,20 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, protocol.address)).to.eq(50);
     });
 
-    it("Should convert usd to landc", async function () {
+    it.only("Should convert usd to landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+      let tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
 
+      expect(await getBalance(landingToken, landingToken.address)).to.eq(1000000000000);
+      expect(await getBalance(landingToken, protocol.address)).to.eq(0);
+      
+      tx = await protocol.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
+      expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
+      expect(await getBalance(landingToken, protocol.address)).to.eq(100);
     });
 
     it("Should ", async function () {
