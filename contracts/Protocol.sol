@@ -34,12 +34,7 @@ contract Protocol is Ownable{
 
     mapping (uint256=>PropertyDetail) private _properties;
 
-    event PayLANDC(
-        string date, // "month-year" 
-        uint256 propertyID,
-        uint256 amount,
-        address rentPayer
-    );
+  
 
     event BuyLANDC(
         address buyer,
@@ -57,7 +52,9 @@ contract Protocol is Ownable{
 
     event PayRentLANDC(
         address rentPayer,
+        uint256 propertyID,
         uint256 amount,
+        uint256 date,
         uint256 timestamp
     );
 
@@ -124,12 +121,12 @@ contract Protocol is Ownable{
         return _properties[propertyID];
     }
 
-    function payRentLandc(uint256 amount, string memory _date, uint256 _propertyID) external{
-        require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
+    // _date => first timestamp of start of the month
+    function payRentLandc(uint256 amount, uint256 _date, uint256 _propertyID) external{
+        require(_properties[_propertyID].imageCID.length != 0, "Property do not exist");
         require(_landingToken.balanceOf(msg.sender) >= amount, "Not enogh balance");
         _landingToken.payToProtocol(amount, msg.sender);
-        emit PayLANDC(_date, _propertyID, amount, msg.sender);
-        emit PayRentLANDC(msg.sender, amount, block.timestamp);
+        emit PayRentLANDC(msg.sender, _propertyID, amount, _date, block.timestamp);
     }
 
     function convertUSDRentToLandc(uint256 amount, uint256 usdAmount, string memory rentTxID) external onlyOwner {

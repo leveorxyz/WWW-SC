@@ -133,7 +133,7 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
-    it.only("Should add new property", async function () {
+    it("Should add new property", async function () {
       const { protocol } = await loadFixture(deployOnceFixture);
       const propertyID = 43947893;
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
@@ -148,16 +148,29 @@ describe("Landing token test suite", function () {
     });
 
 
-    it("Should pay rent in landc", async function () {
+    it.only("Should pay rent in landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const propertyID = 43947893;
+      const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
+      const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
+      let tx = await protocol.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
+      await tx.wait();
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
-      let tx = await oracle.addBuyTx(txID, usdAmount);
+      tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
       tx = await protocol.buyLANDC(usdAmount, txID);
       await tx.wait();
 
+      expect(await getBalance(landingToken, owner.address)).to.eq(96);
+      expect(await getBalance(landingToken, protocol.address)).to.eq(0);
 
+      let rentPaid =  ethers.utils.parseUnits("50", "ether");
+      tx = await  protocol.payRentLandc(rentPaid, 1661990400, propertyID);
+      await tx.wait();
+
+      expect(await getBalance(landingToken, owner.address)).to.eq(46);
+      expect(await getBalance(landingToken, protocol.address)).to.eq(50);
     });
 
     it("Should ", async function () {
