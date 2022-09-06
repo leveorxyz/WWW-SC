@@ -73,7 +73,7 @@ contract Protocol is Ownable{
         return address(_landingToken);
     }
 
-    function buyLANDC(uint256 usdAmount, uint256 txID) external {
+    function buyLANDC(uint256 usdAmount, string memory txID) external {
         uint256 priceInWei = _landingToken.getPrice();
         uint256 amount = priceInWei*usdAmount;
         require(_landingToken.balanceOf(address(_landingToken))>= amount, "Not enough balance");
@@ -99,7 +99,7 @@ contract Protocol is Ownable{
         return(false, 0);        
     }
 
-    function sellLANDC(uint256 userAddressIndex, uint256 usdAmount, uint256 txID) external {
+    function sellLANDC(uint256 userAddressIndex, uint256 usdAmount, string memory txID) external {
         uint256 priceInWei = _landingToken.getPrice();
         uint256 amount = priceInWei*usdAmount;
         require(_landingToken.balanceOf(address(msg.sender))>= amount, "Not enough balance");
@@ -132,7 +132,7 @@ contract Protocol is Ownable{
         emit PayRentLANDC(msg.sender, amount, block.timestamp);
     }
 
-    function convertUSDRentToLandc(uint256 amount, uint256 usdAmount, uint256 rentTxID) external onlyOwner {
+    function convertUSDRentToLandc(uint256 amount, uint256 usdAmount, string memory rentTxID) external onlyOwner {
         uint256 mainWaletBalance = _landingToken.balanceOf(address(_landingToken));
         bool usdPaid = _oracle.checkRentTx(rentTxID, usdAmount);
         require(usdPaid, "USD not paid");

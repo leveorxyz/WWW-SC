@@ -69,7 +69,7 @@ describe("Landing token test suite", function () {
 
     it("Should buy landc", async function () {
       const { owner, protocol, oracle, landingToken } = await loadFixture(deployOnceFixture);
-      let txID = 42575788;
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
       
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(0);
@@ -90,7 +90,7 @@ describe("Landing token test suite", function () {
 
     it.only("Should sell token", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-      let txID = 42575788;
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();

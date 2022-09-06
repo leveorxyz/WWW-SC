@@ -29,7 +29,7 @@ contract Oracle is Ownable{
     }
 
     modifier buyUsdTxIDDontExixt(string memory buyUSDTx) {
-        require(_buyUSDTxIDs[buyUSDTx] != 0, "Buy tx already added");
+        require(_buyUSDTxIDs[buyUSDTx] == 0, "Buy tx already added");
         _;
     }
 
@@ -39,7 +39,7 @@ contract Oracle is Ownable{
     }
 
     modifier rentUsdTxIDDontExixt(string memory rentUSDTx) {
-        require(_rentUSDTxIDs[rentUSDTx] != 0, "Rent tx already added");
+        require(_rentUSDTxIDs[rentUSDTx] == 0, "Rent tx already added");
         _;
     }
 
