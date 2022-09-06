@@ -134,7 +134,7 @@ describe("Landing token test suite", function () {
     });
 
     it.only("Should add new property", async function () {
-      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const { protocol } = await loadFixture(deployOnceFixture);
       const propertyID = 43947893;
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
       const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
