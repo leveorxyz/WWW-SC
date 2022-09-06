@@ -10,6 +10,7 @@ contract Protocol is Ownable{
     LandingToken private _landingToken;
     IOracle private _oracle;
     address[] buyerAddresses;
+    address private _masterAccount;
 
     struct Claim {
         uint16 hoursClaimable;
@@ -19,6 +20,8 @@ contract Protocol is Ownable{
     // address => timestamp => claimable amount
     mapping (address => mapping(uint256 => Claim)) totalLandcAllocated;
     uint256 private _totalClaimable;
+
+    uint256 private _maintenanceVaultAmount;
 
     // The timestamp of 12:00 am of the first day of the month 
     uint256 private _lastTimestampRentDistributed;
@@ -58,8 +61,9 @@ contract Protocol is Ownable{
         uint256 timestamp
     );
 
-    constructor(address oracleAddress, uint256 intialTimestamp) {
+    constructor(address oracleAddress, uint256 intialTimestamp, address __masterAccount) {
       _landingToken = new LandingToken();
+      _masterAccount = __masterAccount;
       _oracle = IOracle(oracleAddress);
       _oracle.initialize();
       _lastTimestampRentDistributed = intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
@@ -157,8 +161,8 @@ contract Protocol is Ownable{
     }
 
     // !!! Timestamp should be 12 am first day of the Month
-    function distributePayment(uint256 rentToDistribute, uint256 timestamp) external onlyOwner {
-        require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute, "Not enough balance in protocol contract");       
+    function distributePayment(uint256 rentToDistribute, uint256 maintainiaceAmount, uint256 timestamp) external onlyOwner {
+        require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute+maintainiaceAmount, "Not enough balance in protocol contract");       
         uint16 hoursInMonths = getHours(timestamp);
         require(hoursInMonths != 0, "Timestamp given is incorrect");
         uint256 totalAddress = buyerAddresses.length;
@@ -168,7 +172,21 @@ contract Protocol is Ownable{
             totalLandcAllocated[buyerAddresses[index]][timestamp].amountPerHour  = eachClaimablePerHour;
         }
         _totalClaimable += rentToDistribute;
+        _maintenanceVaultAmount += maintainiaceAmount;
         _lastTimestampRentDistributed = timestamp;
+    }
+
+    function claimmaintenanceFee(uint256 amount) external {
+        require(msg.sender == _masterAccount, "Not the master account");
+        require(amount <= _maintenanceVaultAmount, "Not enough maintenance fee to collect");
+        require(_landingToken.balanceOf(address(this)) >= _totalClaimable+_maintenanceVaultAmount, "Not enough balance in protocol contract");       
+        _maintenanceVaultAmount -= amount;
+        _landingToken.transfer(msg.sender, amount);
+    }
+
+    function getmaintenanceFee() external view returns(uint256) {
+        require(msg.sender == _masterAccount, "Not the master account");
+        return _maintenanceVaultAmount;
     }
 
     function getClaimable(uint256 timestamp) external view returns(uint256){
