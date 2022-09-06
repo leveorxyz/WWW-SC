@@ -128,8 +128,8 @@ describe("Landing token test suite", function () {
       await tx.wait();
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
       
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(5.999999999640001);
-      expect(await getBalance(landingToken, owner.address)).to.eq(5.999999999640001);
+      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(6.000000000359999);
+      expect(await getBalance(landingToken, owner.address)).to.eq(6.000000000359999);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
@@ -187,6 +187,7 @@ describe("Landing token test suite", function () {
       
       tx = await protocol.convertUSDRentToLandc(usdAmount, txID);
       await tx.wait();
+
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       expect(await getBalance(landingToken, protocol.address)).to.eq(100);
     });
@@ -210,8 +211,17 @@ describe("Landing token test suite", function () {
       await tx.wait();
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999800);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
-      expect(await getBalance(landingToken, account2.address)).to.eq(96.000000000384);
+      expect(await getBalance(landingToken, account2.address)).to.eq(95.999999999616);
 
+      expect(await getBalance(landingToken, protocol.address)).to.eq(0);
+      expect(await getPrice(landingToken)).to.eq(1.000000000008);
+      
+      tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
+      tx = await protocol.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
+      expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992);
+      
     });
 
     it("Should ", async function () {
