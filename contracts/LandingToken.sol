@@ -63,6 +63,6 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     }
 
     function getPrice() external view returns(uint256) {
-        return totalSupply() / 1000000000000;
+        return (1000000000000 * 10 ** decimals())/(totalSupply()/ 10 ** decimals());
     }
 }

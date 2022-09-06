@@ -41,6 +41,10 @@ describe("Landing token test suite", function () {
      return Number(await tokenContract.balanceOf(address))/ 10**18;
    }
 
+   const getPrice = async (tokenContract: LandingToken) => {
+    return Number(await tokenContract.getPrice())/ 10**18;
+  }
+
    const getAllowance = async (tokenContract: LandingToken, ownerAddress: string, spenderAddress: string) => {
     return Number(await tokenContract.allowance(ownerAddress, spenderAddress))/ 10**18;
   }
@@ -68,6 +72,7 @@ describe("Landing token test suite", function () {
       let usdAmount = 100;
       
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(0);
+      expect(await getPrice(landingToken)).to.eq(1);
       
       expect(await getBalance(landingToken, owner.address)).to.eq(0);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(1000000000000);
@@ -78,6 +83,8 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
+      expect(await getPrice(landingToken)).to.eq(1.000000000004);
+      
     });
 
     it("Should sell token", async function () {
@@ -92,7 +99,7 @@ describe("Landing token test suite", function () {
       usdAmount = 90;
       tx = await oracle.addSellTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.sellLANDC(usdAmount, txID);
+      tx = await protocol.sellLANDC(1, usdAmount, txID);
       await tx.wait();
     });
 
