@@ -23,16 +23,17 @@ describe("Landing token test suite", function () {
     let protocol: Protocol;
     // Contracts are deployed using the first signer/account by default
     const [owner, ...otherAccounts] = await ethers.getSigners();
-
+    const masterAccount = otherAccounts[0];
+ 
     oracle = (await deployContract(owner, OracleArtifacts)) as Oracle;
-    protocol = (await deployContract(owner, ProtocolArtifacts, [oracle.address, initTimestamp])) as Protocol;
+    protocol = (await deployContract(owner, ProtocolArtifacts, [oracle.address, initTimestamp, masterAccount.address])) as Protocol;
     landingToken = LandingToken__factory.connect(await protocol.getLandingTokenAddress(), owner) as LandingToken;
   
     // console.log(oracle.address);
     // console.log(protocol.address);
     // console.log(landingToken.address);
     
-    return {  owner, otherAccounts, oracle, protocol, landingToken };
+    return {  owner, masterAccount, otherAccounts, oracle, protocol, landingToken };
   }
 
   describe("Test suite", function () {
