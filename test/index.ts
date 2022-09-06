@@ -66,7 +66,7 @@ describe("Landing token test suite", function () {
       expect(allowance).to.eq(1000000000000);
     });
 
-    it.only("Should buy landc", async function () {
+    it("Should buy landc", async function () {
       const { owner, protocol, oracle, landingToken } = await loadFixture(deployOnceFixture);
       let txID = 42575788;
       let usdAmount = 100;
@@ -87,7 +87,7 @@ describe("Landing token test suite", function () {
       
     });
 
-    it("Should sell token", async function () {
+    it.only("Should sell token", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       let txID = 42575788;
       let usdAmount = 100;
@@ -95,12 +95,17 @@ describe("Landing token test suite", function () {
       await tx.wait();
       tx = await protocol.buyLANDC(usdAmount, txID);
       await tx.wait();
-
+      expect(await getBalance(landingToken, owner.address)).to.eq(96);
+      expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
+      
       usdAmount = 90;
       tx = await oracle.addSellTx(txID, usdAmount);
       await tx.wait();
       tx = await protocol.sellLANDC(1, usdAmount, txID);
       await tx.wait();
+
+      expect(await getBalance(landingToken, owner.address)).to.eq(5.999999999640001);
+      expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
     it("Should ", async function () {

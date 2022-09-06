@@ -69,9 +69,9 @@ contract Oracle is Ownable{
     }
 
     function checkSellTx(uint256 sellUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
-        bool exist = _rentUSDTxIDs[sellUSDTx] == amount;
+        bool exist = _sellUSDTxIDs[sellUSDTx] == amount;
         if(exist){
-            delete _rentUSDTxIDs[sellUSDTx];
+            delete _sellUSDTxIDs[sellUSDTx];
         }
         return exist;
     }
