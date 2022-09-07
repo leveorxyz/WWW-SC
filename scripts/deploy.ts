@@ -3,13 +3,14 @@ import { ethers } from "hardhat";
 async function main() {
   // const lockedAmount = ethers.utils.parseEther("1");
 
-  const Greeter = await ethers.getContractFactory("Greeter");
+  const Oracle = await ethers.getContractFactory("Oracle");
   // const greeting = await Greeting.deploy("Hello world", { value: lockedAmount });
-  const greeter = await Greeter.deploy("Hello world");
+  const oracle = await Oracle.deploy();
 
-  await greeter.deployed();
+  await oracle.deployed();
+  console.log("Greeting contract deployed to: ", oracle.address);
 
-  console.log("Greeting contract deployed to: ", greeter.address);
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
