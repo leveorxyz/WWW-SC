@@ -175,7 +175,7 @@ contract Protocol is Ownable{
         _lastTimestampRentDistributed = timestamp;
     }
 
-    function claimmaintenanceFee(uint256 amount) external {
+    function claimMaintenanceFee(uint256 amount) external {
         require(msg.sender == _masterAccount, "Not the master account");
         require(amount <= _maintenanceVaultAmount, "Not enough maintenance fee to collect");
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+_maintenanceVaultAmount, "Not enough balance in protocol contract");       
@@ -183,7 +183,7 @@ contract Protocol is Ownable{
         _landingToken.transfer(msg.sender, amount);
     }
 
-    function getmaintenanceFee() external view returns(uint256) {
+    function getMaintenanceFee() external view returns(uint256) {
         require(msg.sender == _masterAccount, "Not the master account");
         return _maintenanceVaultAmount;
     }

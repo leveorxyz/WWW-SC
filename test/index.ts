@@ -196,7 +196,7 @@ describe("Landing token test suite", function () {
     });
 
     it.only("Should distribute rent to token holder", async function () {
-      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const { owner, otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
       const account2 = otherAccounts[1];
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -293,41 +293,24 @@ describe("Landing token test suite", function () {
 
       expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
       expect(Number(await protocol.connect(account2).getClaimable(sept1stTimestamp))/10**18).to.eq(0);
-  
+
+      expect(Number(await protocol.connect(masterAccount).getMaintenanceFee())/10**18).to.eq(1);
+
+      expect(await getBalance(landingToken, masterAccount.address)).to.eq(0);
+      let amnt =  ethers.utils.parseUnits("1", "ether");
+      await expect(protocol.connect(account2).claimMaintenanceFee(amnt)).to.be
+      .reverted;
+      tx = await protocol.connect(masterAccount).claimMaintenanceFee(amnt);
+      expect(await getBalance(landingToken, masterAccount.address)).to.eq(1);
+     
+      expect(Number(await protocol.connect(masterAccount).getMaintenanceFee())/10**18).to.eq(0);
 
     });
 
     it("Should ", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
     });
-
-    it("Should ", async function () {
-      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-    });
-
-    it("Should ", async function () {
-      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-    });
-
-    it("Should ", async function () {
-      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-    });
-
-    it("Should ", async function () {
-      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-    });
-
-    it("Should ", async function () {
-      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-    });
-
-    it("Should ", async function () {
-      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-    });
-
-    it("Should ", async function () {
-      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-    });
+   
 
   });
 
