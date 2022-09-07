@@ -236,16 +236,13 @@ describe("Landing token test suite", function () {
       tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
       await tx.wait();
 
-      // expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(9.286290322580646);
-      // expect(Number(await protocol.connect(account2).getClaimable(sept1stTimestamp))/10**18).to.eq(9.286290322580646);  
-      expect(Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+      const totalClaimable = Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18;
+      expect(totalClaimable).to.eq(49);
       expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);     
-      // console.log(Number(await protocol.connect(account2).getClaimable(sept1stTimestamp))/10**18);
-    
       
 
       const threeHours = 7 * 24 * 60 * 60;
-      const thirtyOneDays = 30 * 24 * 60 * 60;
+      const thirtyOneDays = 31 * 24 * 60 * 60;
       const blockNumBefore = await ethers.provider.getBlockNumber();
       const blockBefore = await ethers.provider.getBlock(blockNumBefore);
       const timestampBefore = blockBefore.timestamp;
@@ -278,8 +275,12 @@ describe("Landing token test suite", function () {
   
       expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.be.closeTo(perHourClaimable*Math.floor((timestampAfter2-timestampAfter)/3600), 0.0001);
       
-      
-      
+      await ethers.provider.send('evm_increaseTime', [thirtyOneDays]);
+      await ethers.provider.send('evm_mine', []);
+      blockNumAfter = await ethers.provider.getBlockNumber();
+      blockAfter = await ethers.provider.getBlock(blockNumAfter);
+      const timestampAfterfinal = blockAfter.timestamp;
+      expect(totalClaimable-(Number(currentClaimable)/10**18)).to.be.closeTo(Number(await protocol.getClaimable(sept1stTimestamp))/10**18, 0.0001);
       // expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992-99);
       // expect(await getBalance(landingToken, owner.address)).to.eq(96+48);
       // expect(await getBalance(landingToken, account2.address)).to.eq(95.999999999616+48);

@@ -216,14 +216,6 @@ contract Protocol is Ownable{
         return _landingToken.balanceOf(address(this)) - _totalClaimable;
     }
 
- 
-
-    // function getD(uint256 timestamp) external view returns(uint256, uint256) {
-    //     uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
-    //     uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
-    //     return (claimablePerHour, hoursClaimable);
-    // }
-
     function claimLANDC(uint256 timestamp) external{
         uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
         require(claimablePerHour != 0, "No claimable landc");
