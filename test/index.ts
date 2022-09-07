@@ -18,7 +18,7 @@ describe("Landing token test suite", function () {
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshopt in every test.
   async function deployOnceFixture() {
-    const initTimestamp: number = 1659312000; // UTC timestamp, Sept 1st, 2022, 12:00 am 
+    const initTimestamp: number = 1659312000; // UTC timestamp, August 1st, 2022, 12:00 am 
     let landingToken: LandingToken;
     let oracle: Oracle;
     let protocol: Protocol;
