@@ -195,7 +195,7 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, protocol.address)).to.eq(100);
     });
 
-    it.only("Should distribute rent to token holder", async function () {
+    it("Should distribute rent to token holder and claim payouts and fee", async function () {
       const { owner, otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
       const account2 = otherAccounts[1];
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
