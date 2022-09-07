@@ -15,6 +15,7 @@ contract Protocol is Ownable{
     struct Claim {
         uint16 hoursClaimable;
         uint256 amountPerHour;
+        uint256 hoursClaimed;
     }
     
     // address => timestamp => claimable amount
@@ -191,14 +192,16 @@ contract Protocol is Ownable{
         return totalLandcAllocated[msg.sender][timestamp].hoursClaimable * totalLandcAllocated[msg.sender][timestamp].amountPerHour;
     }
 
+
     function getClaimable(uint256 timestamp) public view returns(uint256) {
         uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
-        if(claimablePerHour == 0){
+        uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
+        uint256 claimedSeconds = totalLandcAllocated[msg.sender][timestamp].hoursClaimed*3600;
+        if(claimablePerHour == 0 || hoursClaimable == 0 || block.timestamp<timestamp+claimedSeconds){
             return 0;
         }
-        uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
-        require(block.timestamp>timestamp, "Month have not past");
-        uint256 hoursPassed = (block.timestamp-timestamp)/3600;
+       
+        uint256 hoursPassed = (block.timestamp-timestamp-claimedSeconds)/3600;
         uint256 totalClaimable = 0;
         if(hoursPassed >= hoursClaimable){     
              totalClaimable =  hoursClaimable*claimablePerHour;      
@@ -213,20 +216,32 @@ contract Protocol is Ownable{
         return _landingToken.balanceOf(address(this)) - _totalClaimable;
     }
 
+ 
+
+    // function getD(uint256 timestamp) external view returns(uint256, uint256) {
+    //     uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
+    //     uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
+    //     return (claimablePerHour, hoursClaimable);
+    // }
+
     function claimLANDC(uint256 timestamp) external{
         uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
         require(claimablePerHour != 0, "No claimable landc");
+        uint256 claimedSeconds = totalLandcAllocated[msg.sender][timestamp].hoursClaimed*3600;
         uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
-        require(block.timestamp>timestamp, "Month have not past");
-        uint256 hoursPassed = (block.timestamp-timestamp)/3600;
+        require(hoursClaimable != 0, "No claimable currently");
+        require(block.timestamp>timestamp+claimedSeconds, "Month have not past");
+        uint256 hoursPassed = (block.timestamp-timestamp-claimedSeconds)/3600;
         uint256 totalClaimable;
         if(hoursPassed >= hoursClaimable){     
              totalClaimable =  hoursClaimable*claimablePerHour;      
             totalLandcAllocated[msg.sender][timestamp].amountPerHour = 0;
+             totalLandcAllocated[msg.sender][timestamp].hoursClaimed += hoursClaimable;
             totalLandcAllocated[msg.sender][timestamp].hoursClaimable = 0;
         }
         else{
             totalClaimable = hoursPassed*claimablePerHour;
+            totalLandcAllocated[msg.sender][timestamp].hoursClaimed += hoursPassed;
             totalLandcAllocated[msg.sender][timestamp].hoursClaimable -= uint16(hoursPassed);
         }
         _totalClaimable -= totalClaimable;

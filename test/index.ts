@@ -9,6 +9,7 @@ import {Oracle} from '../typechain/contracts/Oracle';
 import ProtocolArtifacts from '../artifacts/contracts/Protocol.sol/Protocol.json';
 import {Protocol} from '../typechain/contracts/Protocol';
 import { LandingToken__factory } from '../typechain/factories/contracts/LandingToken__factory';
+import { exitCode } from "process";
 
 const {deployContract} = waffle;
 
@@ -167,9 +168,9 @@ describe("Landing token test suite", function () {
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
-
+      const sept1stTimestamp  = 1661990400;
       let rentPaid =  ethers.utils.parseUnits("50", "ether");
-      tx = await  protocol.payRentLandc(rentPaid, 1661990400, propertyID);
+      tx = await  protocol.payRentLandc(rentPaid, sept1stTimestamp, propertyID);
       await tx.wait();
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(46);
      
@@ -226,20 +227,59 @@ describe("Landing token test suite", function () {
       
       const distributionAmount =  ethers.utils.parseUnits("98", "ether");
       const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
-      const oct1stTimestamp = 1661990400;
+      const sept1stTimestamp = 1661990400;
 
-      expect(Number(await protocol.getClaimable(1661990400))/10**18).to.eq(0);
-      expect(Number(await protocol.connect(account2).getClaimable(1661990400))/10**18).to.eq(0);  
+      expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
+      expect(Number(await protocol.connect(account2).getClaimable(sept1stTimestamp))/10**18).to.eq(0);  
    
 
-      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, oct1stTimestamp);
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
       await tx.wait();
 
-      expect(Number(await protocol.getClaimable(1661990400))/10**18).to.eq(9.286290322580646);
-      expect(Number(await protocol.connect(account2).getClaimable(1661990400))/10**18).to.eq(9.286290322580646);  
-      expect(Number(await protocol.getTotalClaimableInMonth(1661990400))/10**18).to.eq(49);
-      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(1661990400))/10**18).to.eq(49);     
+      // expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(9.286290322580646);
+      // expect(Number(await protocol.connect(account2).getClaimable(sept1stTimestamp))/10**18).to.eq(9.286290322580646);  
+      expect(Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);     
+      // console.log(Number(await protocol.connect(account2).getClaimable(sept1stTimestamp))/10**18);
+    
+      
 
+      const threeHours = 7 * 24 * 60 * 60;
+      const thirtyOneDays = 30 * 24 * 60 * 60;
+      const blockNumBefore = await ethers.provider.getBlockNumber();
+      const blockBefore = await ethers.provider.getBlock(blockNumBefore);
+      const timestampBefore = blockBefore.timestamp;
+      const perHourClaimable = 0.065860215053763440;
+
+      expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.be.closeTo(perHourClaimable*Math.floor((timestampBefore-sept1stTimestamp)/3600), 0.0001);
+
+      await ethers.provider.send('evm_increaseTime', [threeHours]);
+      await ethers.provider.send('evm_mine', []);
+
+      let blockNumAfter = await ethers.provider.getBlockNumber();
+      let blockAfter = await ethers.provider.getBlock(blockNumAfter);
+      const timestampAfter = blockAfter.timestamp;
+      let currentClaimable = await protocol.getClaimable(sept1stTimestamp);
+
+      expect(Number(currentClaimable)/10**18).to.be.closeTo(perHourClaimable*Math.floor((timestampAfter-sept1stTimestamp)/3600), 0.0001);
+    
+      const prevBalance = await getBalance(landingToken, owner.address);    
+      tx = await protocol.claimLANDC(sept1stTimestamp);
+      await tx.wait();  
+      expect((await getBalance(landingToken, owner.address))).to.eq(prevBalance+(Number(currentClaimable)/10**18));
+
+      expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
+    
+      await ethers.provider.send('evm_increaseTime', [threeHours]);
+      await ethers.provider.send('evm_mine', []);
+      blockNumAfter = await ethers.provider.getBlockNumber();
+      blockAfter = await ethers.provider.getBlock(blockNumAfter);
+      const timestampAfter2 = blockAfter.timestamp;
+  
+      expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.be.closeTo(perHourClaimable*Math.floor((timestampAfter2-timestampAfter)/3600), 0.0001);
+      
+      
+      
       // expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992-99);
       // expect(await getBalance(landingToken, owner.address)).to.eq(96+48);
       // expect(await getBalance(landingToken, account2.address)).to.eq(95.999999999616+48);
