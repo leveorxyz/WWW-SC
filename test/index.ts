@@ -281,11 +281,19 @@ describe("Landing token test suite", function () {
       blockAfter = await ethers.provider.getBlock(blockNumAfter);
       const timestampAfterfinal = blockAfter.timestamp;
       expect(totalClaimable-(Number(currentClaimable)/10**18)).to.be.closeTo(Number(await protocol.getClaimable(sept1stTimestamp))/10**18, 0.0001);
-      // expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992-99);
-      // expect(await getBalance(landingToken, owner.address)).to.eq(96+48);
-      // expect(await getBalance(landingToken, account2.address)).to.eq(95.999999999616+48);
+      
+      tx = await protocol.claimLANDC(sept1stTimestamp);
+      await tx.wait();
+      tx = await protocol.connect(account2).claimLANDC(sept1stTimestamp);
+      await tx.wait();
+      
+      expect(await getBalance(landingToken, protocol.address)).to.be.closeTo(99.9999999992-98, 0.0001);
+      expect(await getBalance(landingToken, owner.address)).to.eq(96+49);
+      expect(await getBalance(landingToken, account2.address)).to.be.closeTo(95.999999999616+49, 0.0001);
 
-
+      expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
+      expect(Number(await protocol.connect(account2).getClaimable(sept1stTimestamp))/10**18).to.eq(0);
+  
 
     });
 
