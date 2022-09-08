@@ -81,9 +81,9 @@
         },
         {
           "indexed": false,
-          "internalType": "uint256",
+          "internalType": "string",
           "name": "propertyID",
-          "type": "uint256"
+          "type": "string"
         },
         {
           "indexed": false,
@@ -141,9 +141,9 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
+          "internalType": "string",
           "name": "_propertyID",
-          "type": "uint256"
+          "type": "string"
         },
         {
           "internalType": "bytes",
@@ -312,9 +312,9 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
+          "internalType": "string",
           "name": "propertyID",
-          "type": "uint256"
+          "type": "string"
         }
       ],
       "name": "getProperty",
@@ -398,9 +398,9 @@
           "type": "uint256"
         },
         {
-          "internalType": "uint256",
+          "internalType": "string",
           "name": "_propertyID",
-          "type": "uint256"
+          "type": "string"
         }
       ],
       "name": "payRentLandc",
