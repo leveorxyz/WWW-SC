@@ -18,7 +18,7 @@ describe("Landing token test suite", function () {
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshopt in every test.
   async function deployOnceFixture() {
-    const initTimestamp: number = 1659312000; // UTC timestamp, Sept 1st, 2022, 12:00 am 
+    const initTimestamp: number = 1659312000; // UTC timestamp, August 1st, 2022, 12:00 am 
     let landingToken: LandingToken;
     let oracle: Oracle;
     let protocol: Protocol;
@@ -89,7 +89,7 @@ describe("Landing token test suite", function () {
       expect(allowance).to.eq(1000000000000);
     });
 
-    it("Should buy landc", async function () {
+    it.only("Should buy landc", async function () {
       const { owner, protocol, oracle, landingToken } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -106,6 +106,8 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
+      console.log(Number(await landingToken.totalSupply())/10**18);
+      
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
       
     });
@@ -138,7 +140,7 @@ describe("Landing token test suite", function () {
 
     it("Should add new property", async function () {
       const { protocol } = await loadFixture(deployOnceFixture);
-      const propertyID = 43947893;
+      const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
       const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
       let tx = await protocol.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
@@ -153,7 +155,7 @@ describe("Landing token test suite", function () {
 
     it("Should pay rent in landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
-      const propertyID = 43947893;
+      const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
       const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
       let tx = await protocol.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
@@ -263,7 +265,7 @@ describe("Landing token test suite", function () {
       const prevBalance = await getBalance(landingToken, owner.address);    
       tx = await protocol.claimLANDC(sept1stTimestamp);
       await tx.wait();  
-      expect((await getBalance(landingToken, owner.address))).to.eq(prevBalance+(Number(currentClaimable)/10**18));
+      expect((await getBalance(landingToken, owner.address))).to.be.closeTo(prevBalance+(Number(currentClaimable)/10**18), 0.0001);
 
       expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
     

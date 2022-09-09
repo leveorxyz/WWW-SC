@@ -33,7 +33,7 @@ contract Protocol is Ownable{
         bytes legalDocCID;
     }
 
-    mapping (uint256=>PropertyDetail) private _properties;
+    mapping (string=>PropertyDetail) private _properties;
 
   
 
@@ -53,7 +53,7 @@ contract Protocol is Ownable{
 
     event PayRentLANDC(
         address rentPayer,
-        uint256 propertyID,
+        string propertyID,
         uint256 amount,
         uint256 date,
         uint256 timestamp
@@ -110,18 +110,18 @@ contract Protocol is Ownable{
         emit SellLANDC(msg.sender, amount, block.timestamp, usdAmount);
     }
 
-    function addProperty(uint256 _propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
+    function addProperty(string memory _propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
         require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
         _properties[_propertyID].imageCID = imageCID;
         _properties[_propertyID].legalDocCID = legalDocCID;
     }
 
-    function getProperty(uint256 propertyID) external view returns(PropertyDetail memory) {
+    function getProperty(string memory propertyID) external view returns(PropertyDetail memory) {
         return _properties[propertyID];
     }
 
     // _date => first timestamp of start of the month
-    function payRentLandc(uint256 amount, uint256 _date, uint256 _propertyID) external{
+    function payRentLandc(uint256 amount, uint256 _date, string memory _propertyID) external{
         require(_properties[_propertyID].imageCID.length != 0, "Property do not exist");
         require(_landingToken.balanceOf(msg.sender) >= amount, "Not enogh balance");
         _landingToken.payToProtocol(amount, msg.sender);
