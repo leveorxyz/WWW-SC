@@ -9,6 +9,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
 
     uint256 intialMint = 1000000000000;
+
+    mapping (address=>uint256) private _buyers;
+    uint256 numberOfBuyers;
+
     constructor() ERC20("Landing Token", "LANDC") {
         intialMint = 1000000000000;
         _mint(address(this), intialMint * (10 ** decimals()));
