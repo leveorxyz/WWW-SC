@@ -59,12 +59,12 @@ contract Protocol is Ownable{
         uint256 timestamp
     );
 
-    constructor(address oracleAddress, uint256 intialTimestamp, address __masterAccount) {
-      _landingToken = new LandingToken();
+    constructor(address _oracleAddress, uint256 _intialTimestamp, address __masterAccount) {
+      _landingToken = new LandingToken(_oracleAddress);
       _masterAccount = __masterAccount;
-      _oracle = IOracle(oracleAddress);
-      _oracle.initialize();
-      _lastTimestampRentDistributed = intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
+      _oracle = IOracle(_oracleAddress);
+      _oracle.initialize(address(_landingToken));
+      _lastTimestampRentDistributed = _intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
     }
 
     function getLandingTokenAddress() public view returns(address) {

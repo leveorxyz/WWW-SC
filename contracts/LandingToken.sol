@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import './interfaces/IOracle.sol';
 
 contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
 
@@ -12,9 +13,12 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
 
     mapping (address=>uint256) private _buyers;
     uint256 numberOfBuyers;
+  
+    IOracle private _oracle;
 
-    constructor() ERC20("Landing Token", "LANDC") {
+    constructor(address _oracleAddress) ERC20("Landing Token", "LANDC") {
         intialMint = 1000000000000;
+        _oracle = IOracle(_oracleAddress);
         _mint(address(this), intialMint * (10 ** decimals()));
         _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
     }

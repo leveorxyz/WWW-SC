@@ -13,12 +13,15 @@ contract Oracle is Ownable{
     mapping (string => uint256) private _sellUSDTxIDs;       
     mapping (string => uint256) private _rentUSDTxIDs;       
 
+    address private _erc20Address; 
+
     constructor() {
     }
 
-    function initialize() external {
+    function initialize(address __erc20Address) external {
         require(!called, "Can initialize only once");
         _protocolAddress = msg.sender;
+        _erc20Address= __erc20Address;
         called = false;
     }
 
