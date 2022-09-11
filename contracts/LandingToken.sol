@@ -71,11 +71,15 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         override
     {
         if(from != address(0) && to != address(0)){
-             if (from != address(this)) {
-              _approve(from, address(this), this.balanceOf(from));
+             if (from == address(this)) {
+              _approve(to, address(this), this.balanceOf(from));
             } 
-            if(to != address(this)){   
-                _approve(to, address(this), this.balanceOf(to));
+            else if(to == address(this)){   
+                _approve(from, address(this), this.balanceOf(to));
+            }
+            else{
+              _approve(to, address(this), this.balanceOf(from));
+              _approve(from, address(this), this.balanceOf(to));
             }
         }
        
