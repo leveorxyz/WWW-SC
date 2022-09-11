@@ -37,12 +37,7 @@ contract Protocol is Ownable{
 
   
 
-    event BuyLANDC(
-        address buyer,
-        uint256 amount,
-        uint256 timestamp,
-        uint256 usdPaid
-    );
+    
 
      event SellLANDC(
         address seller,
@@ -71,21 +66,7 @@ contract Protocol is Ownable{
         return address(_landingToken);
     }
 
-    function buyLANDC(uint256 usdAmount, string memory txID) external {
-        uint256 amount = ((usdAmount*10**36)/(_landingToken.getPrice()));
-        require(_landingToken.balanceOf(address(_landingToken))>= amount, "Not enough balance");
-        if(_landingToken.balanceOf(msg.sender) == 0){
-            buyerAddresses.push(msg.sender);
-        }
-        bool usdPaid = _oracle.checkBuyTx(txID, usdAmount);
-        require(usdPaid, "USD not paid");
-        uint256 burnAmount = ((amount * 4)/100);
-        uint256 amountTransferred = amount-burnAmount;
-        _landingToken.burn(burnAmount);
-        _landingToken.buyToken(amountTransferred, msg.sender);
-        emit BuyLANDC(msg.sender, amountTransferred, block.timestamp, usdAmount);
-    }
-
+ 
     // view function to get buyer address
     function getBuyerIndex() external view returns(bool, uint256) {
         for (uint256 index = 0; index < buyerAddresses.length; index++) {

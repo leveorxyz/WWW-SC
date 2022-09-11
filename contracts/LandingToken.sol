@@ -16,6 +16,13 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
   
     IOracle private _oracle;
 
+    event BuyLANDC(
+        address buyer,
+        uint256 amount,
+        uint256 timestamp,
+        uint256 usdPaid
+    );
+
     constructor(address _oracleAddress) ERC20("Landing Token", "LANDC") {
         intialMint = 1000000000000;
         _oracle = IOracle(_oracleAddress);
@@ -65,7 +72,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     {
         if(from != address(0) && to != address(0)){
              if (from != address(this)) {
-            _approve(from, address(this), this.balanceOf(from));
+              _approve(from, address(this), this.balanceOf(from));
             } 
             if(to != address(this)){   
                 _approve(to, address(this), this.balanceOf(to));
@@ -75,10 +82,23 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         super._afterTokenTransfer(from, to, amount);
     }
 
-    function buyToken(uint amount, address buyer) external onlyOwner {
+    function buyToken(uint256 usdAmount, string memory txID) external onlyOwner {
+        uint256 amount = ((usdAmount*10**36)/(this.getPrice()));
         require(this.balanceOf(address(this)) >= amount, "Not enough balance");
-        _approve(buyer, msg.sender, this.allowance(buyer, msg.sender)+amount);
-        transferFrom(address(this), buyer, amount);
+
+        if(this.balanceOf(msg.sender) == 0){
+            _buyers[msg.sender] = block.timestamp;
+            numberOfBuyers+=1;
+        }
+        bool usdPaid = _oracle.checkBuyTx(txID, usdAmount);
+        require(usdPaid, "USD not paid");
+        uint256 burnAmount = ((amount * 4)/100);
+        uint256 amountTransferred = amount-burnAmount;
+        this.burn(burnAmount);
+       
+        emit BuyLANDC(msg.sender, amountTransferred, block.timestamp, usdAmount);
+        // _approve(buyer, msg.sender, this.allowance(buyer, msg.sender)+amount);
+        transferFrom(address(this), msg.sender, amount);
     }
 
     function sellToken(uint amount, address seller) external onlyOwner {
