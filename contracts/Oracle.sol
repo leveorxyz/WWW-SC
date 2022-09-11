@@ -18,6 +18,11 @@ contract Oracle is Ownable{
     constructor() {
     }
 
+    modifier onlyERC20() {
+        require(msg.sender == _erc20Address);
+        _;
+    }
+
     function initialize(address __erc20Address) external {
         require(!called, "Can initialize only once");
         _protocolAddress = msg.sender;
@@ -63,7 +68,7 @@ contract Oracle is Ownable{
         _rentUSDTxIDs[rentUSDTx] = amount;
     }
 
-    function checkBuyTx(string memory buyUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
+    function checkBuyTx(string memory buyUSDTx, uint256 amount) external onlyERC20 amountNotZero(amount) returns(bool) {
         bool exist =  _buyUSDTxIDs[buyUSDTx] == amount;
         if(exist){
             delete _buyUSDTxIDs[buyUSDTx];
@@ -71,7 +76,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkSellTx(string memory sellUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
+    function checkSellTx(string memory sellUSDTx, uint256 amount) external onlyERC20 amountNotZero(amount) returns(bool) {
         bool exist = _sellUSDTxIDs[sellUSDTx] == amount;
         if(exist){
             delete _sellUSDTxIDs[sellUSDTx];
