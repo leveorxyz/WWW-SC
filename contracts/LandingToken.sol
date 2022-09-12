@@ -198,7 +198,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         if(mainWaletBalance < amount){
             mint(amount - mainWaletBalance);
         }
-        transferFrom(address(this), _protocolAddress, amount);
+        this.transfer(_protocolAddress, amount);
     }
 
     function getPrice() external view returns(uint256) {
