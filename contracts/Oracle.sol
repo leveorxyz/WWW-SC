@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Oracle is Ownable{
 
-    address private _protocolAddress;
     bool called;
 
     // txID -> usd amount
@@ -19,21 +18,15 @@ contract Oracle is Ownable{
     }
 
     modifier onlyERC20() {
+        require(msg.sender != address(0), "Can not be empty address");
         require(msg.sender == _erc20Address);
         _;
     }
 
     function initialize(address __erc20Address) external {
         require(!called, "Can initialize only once");
-        _protocolAddress = msg.sender;
         _erc20Address= __erc20Address;
         called = false;
-    }
-
-    modifier onlyProtocolAddress() {
-        require(msg.sender != address(0), "Can not be empty address");
-        require(msg.sender == _protocolAddress, "Only called by protocol address");
-        _;
     }
 
     modifier buyUsdTxIDDontExixt(string memory buyUSDTx) {
@@ -84,7 +77,7 @@ contract Oracle is Ownable{
         return exist;
     }
 
-    function checkRentTx(string memory rentUSDTx, uint256 amount) external onlyProtocolAddress amountNotZero(amount) returns(bool) {
+    function checkRentTx(string memory rentUSDTx, uint256 amount) external onlyERC20 amountNotZero(amount) returns(bool) {
         bool exist = _rentUSDTxIDs[rentUSDTx] == amount;
         if(exist){
             delete _rentUSDTxIDs[rentUSDTx];
