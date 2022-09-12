@@ -9,16 +9,16 @@ contract Protocol is Ownable{
   
     address private _masterAccount;
 
-    struct Claim {
-        uint16 hoursClaimable;
-        bool claimSet;
+    struct Claim {  
         uint256 amountPerHour;
         uint256 hoursClaimed;
+        bool claimSet;
+        uint16 hoursClaimable;
     }
 
     struct TotalClaim{
+        uint16 hoursInMonth;
         uint256 eachClaimablePerHour;
-        uint256 hoursInMonth;
         uint256 totalClaimedSet;
     }
     
@@ -133,6 +133,14 @@ contract Protocol is Ownable{
     }
 
     function claimLANDC(uint256 timestamp) external{
+        TotalClaim memory totalClaimDetail = totalClaimDetails[timestamp];
+        require(totalClaimDetail.totalClaimedSet > 0, "Invalid timestamp");
+        require(_landingToken.getBuyer(msg.sender) > totalClaimDetail.totalClaimedSet, "Not eligible to claim");
+        if(!totalLandcAllocated[msg.sender][timestamp].claimSet){
+            totalLandcAllocated[msg.sender][timestamp].hoursClaimable = totalClaimDetail.hoursInMonth;
+            totalLandcAllocated[msg.sender][timestamp].amountPerHour  = totalClaimDetail.eachClaimablePerHour;
+            totalLandcAllocated[msg.sender][timestamp].claimSet = true;
+        }
         uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
         require(claimablePerHour != 0, "No claimable landc");
         uint256 claimedSeconds = totalLandcAllocated[msg.sender][timestamp].hoursClaimed*3600;
