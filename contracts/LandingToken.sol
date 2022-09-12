@@ -73,6 +73,17 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         _burn(address(this), amount);
     }
 
+    function approve(address spender, uint256 amount)
+        public 
+        virtual
+        whenNotPaused
+        override
+        returns (bool)
+       {
+         require(spender != address(this), "Can not change allowance for landing token");
+         return super.approve(spender, amount);
+       } 
+
     function _beforeTokenTransfer(address from, address to, uint256 amount)
         internal
         whenNotPaused

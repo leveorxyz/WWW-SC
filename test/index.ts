@@ -70,7 +70,6 @@ describe("Landing token test suite", function () {
     return Number(await tokenContract.allowance(ownerAddress, spenderAddress))/ 10**18;
   }
 
-  
     it("Should initial price be 1", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const price = Number(await landingToken.getPrice()) / (10**18);
@@ -83,18 +82,12 @@ describe("Landing token test suite", function () {
       expect(supply).to.eq(1000000000000);
     });
 
-    it("Should initial allowance for protocol from token contract be 1000000000000", async function () {
-      const { landingToken, protocol } = await loadFixture(deployOnceFixture);
-      const allowance = Number(await landingToken.allowance(landingToken.address, protocol.address)) / (10**18);
-      expect(allowance).to.eq(1000000000000);
-    });
-
-    it.only("Should buy landc", async function () {
-      const { owner, protocol, oracle, landingToken } = await loadFixture(deployOnceFixture);
+    it("Should buy landc", async function () {
+      const { owner, oracle, landingToken } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
       
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(0);
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(0);
       expect(await getPrice(landingToken)).to.eq(1);
       
       expect(await getBalance(landingToken, owner.address)).to.eq(0);
@@ -105,7 +98,7 @@ describe("Landing token test suite", function () {
       await tx.wait();
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
       console.log(Number(await landingToken.totalSupply())/10**18);
       
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
