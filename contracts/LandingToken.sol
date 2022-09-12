@@ -52,7 +52,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         _oracle = IOracle(_oracleAddress);
         _protocolAddress= __protocolAddress;
         _mint(address(this), intialMint * (10 ** decimals()));
-        _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
+        // _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
     }
 
     function pause() public onlyOwner {
@@ -65,7 +65,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
 
     function mint(uint256 amount) public onlyOwner {
         intialMint += amount;
-        _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
+        // _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
         _mint(address(this), amount);
     }
 
@@ -97,8 +97,12 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         super._beforeTokenTransfer(from, to, amount);
     }
 
-    function getBuyer(address addressToCheck) public view returns(uint256, uint256) {
-        return (_buyers[addressToCheck], numberOfBuyers);
+    function getBuyer(address addressToCheck) public view returns(uint256) {
+        return _buyers[addressToCheck];
+    }
+
+    function getTotalBuyers() public view returns(uint256) {
+        return numberOfBuyers;
     }
 
     function _afterTokenTransfer(address from, address to, uint256 amount)

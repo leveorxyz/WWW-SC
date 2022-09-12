@@ -3,46 +3,45 @@ pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import './LandingToken.sol';
-import './interfaces/IOracle.sol';
-
 
 contract Protocol is Ownable{
     LandingToken private _landingToken;
-    IOracle private _oracle;
-    address[] buyerAddresses;
+  
     address private _masterAccount;
 
     struct Claim {
         uint16 hoursClaimable;
+        bool claimSet;
         uint256 amountPerHour;
         uint256 hoursClaimed;
+    }
+
+    struct TotalClaim{
+        uint256 eachClaimablePerHour;
+        uint256 hoursInMonth;
+        uint256 totalClaimedSet;
     }
     
     // address => timestamp => claimable amount
     mapping (address => mapping(uint256 => Claim)) totalLandcAllocated;
     uint256 private _totalClaimable;
+    mapping(uint256 => TotalClaim) private totalClaimDetails;
 
     uint256 private _maintenanceVaultAmount;
 
     // The timestamp of 12:00 am of the first day of the month 
     uint256 private _lastTimestampRentDistributed;
     
-    
-    
 
     constructor(address _oracleAddress, uint256 _intialTimestamp, address __masterAccount) {
       _landingToken = new LandingToken(_oracleAddress, address(this));
       _masterAccount = __masterAccount;
-      _oracle = IOracle(_oracleAddress);
-      _oracle.initialize(address(_landingToken));
       _lastTimestampRentDistributed = _intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
     }
 
     function getLandingTokenAddress() public view returns(address) {
         return address(_landingToken);
     }
-
-   
 
 
     function getHours(uint256 timestamp) internal view returns(uint16) {
@@ -69,12 +68,13 @@ contract Protocol is Ownable{
         require(block.timestamp>timestamp, "Month have not past");
         uint16 hoursInMonths = getHours(timestamp);
         require(hoursInMonths != 0, "Timestamp given is incorrect");
-        uint256 totalAddress = buyerAddresses.length;
+        uint256 totalAddress = _landingToken.getTotalBuyers();
         uint256 eachClaimablePerHour = (rentToDistribute/totalAddress)/uint256(hoursInMonths);
-        for (uint256 index = 0; index < totalAddress; index++) {
-            totalLandcAllocated[buyerAddresses[index]][timestamp].hoursClaimable  = hoursInMonths;
-            totalLandcAllocated[buyerAddresses[index]][timestamp].amountPerHour  = eachClaimablePerHour;
-        }
+
+        totalClaimDetails[timestamp].eachClaimablePerHour = eachClaimablePerHour;
+        totalClaimDetails[timestamp].hoursInMonth = hoursInMonths;
+        totalClaimDetails[timestamp].totalClaimedSet = block.timestamp;
+        
         _totalClaimable += rentToDistribute;
         _maintenanceVaultAmount += maintainiaceAmount;
         _lastTimestampRentDistributed = timestamp;
