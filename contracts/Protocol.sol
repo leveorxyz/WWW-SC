@@ -93,32 +93,39 @@ contract Protocol is Ownable{
         return _maintenanceVaultAmount;
     }
 
+    function getClaimableAllocated(uint256 timestamp) internal view returns(uint256) {
+        return totalClaimDetails[timestamp].eachClaimablePerHour*totalClaimDetails[timestamp].hoursInMonth;
+        
+    }
+
     function getTotalClaimableInMonth(uint256 timestamp) external view returns(uint256){
         if(totalLandcAllocated[msg.sender][timestamp].claimSet){
             return totalLandcAllocated[msg.sender][timestamp].hoursClaimable * totalLandcAllocated[msg.sender][timestamp].amountPerHour;
         }
-        return totalClaimDetails[timestamp].eachClaimablePerHour*totalClaimDetails[timestamp].hoursInMonth;
+        return getClaimableAllocated(timestamp);
     }
 
 
     function getClaimable(uint256 timestamp) public view returns(uint256) {
-        require(totalLandcAllocated[msg.sender][timestamp].claimSet, "Call getTotalClaimableInMonth instead");
-        uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
-        uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
-        uint256 claimedSeconds = totalLandcAllocated[msg.sender][timestamp].hoursClaimed*3600;
-        if(claimablePerHour == 0 || hoursClaimable == 0 || block.timestamp<timestamp+claimedSeconds){
-            return 0;
+        if(totalLandcAllocated[msg.sender][timestamp].claimSet){
+            uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
+            uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
+            uint256 claimedSeconds = totalLandcAllocated[msg.sender][timestamp].hoursClaimed*3600;
+            if(claimablePerHour == 0 || hoursClaimable == 0 || block.timestamp<timestamp+claimedSeconds){
+                return 0;
+            }
+        
+            uint256 hoursPassed = (block.timestamp-timestamp-claimedSeconds)/3600;
+            uint256 totalClaimable = 0;
+            if(hoursPassed >= hoursClaimable){     
+                totalClaimable =  hoursClaimable*claimablePerHour;      
+            }
+            else{
+                totalClaimable = hoursPassed*claimablePerHour;
+            }
+            return totalClaimable;    
         }
-       
-        uint256 hoursPassed = (block.timestamp-timestamp-claimedSeconds)/3600;
-        uint256 totalClaimable = 0;
-        if(hoursPassed >= hoursClaimable){     
-             totalClaimable =  hoursClaimable*claimablePerHour;      
-        }
-        else{
-            totalClaimable = hoursPassed*claimablePerHour;
-        }
-        return totalClaimable;
+        return getClaimableAllocated(timestamp);
     }
 
     function getTotalSaving() external view onlyOwner returns(uint256) {
