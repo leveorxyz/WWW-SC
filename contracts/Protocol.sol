@@ -28,20 +28,7 @@ contract Protocol is Ownable{
     uint256 private _lastTimestampRentDistributed;
     
     
-    struct PropertyDetail{
-        bytes imageCID;
-        bytes legalDocCID;
-    }
-
-    mapping (string=>PropertyDetail) private _properties;
-
-    event PayRentLANDC(
-        address rentPayer,
-        string propertyID,
-        uint256 amount,
-        uint256 date,
-        uint256 timestamp
-    );
+    
 
     constructor(address _oracleAddress, uint256 _intialTimestamp, address __masterAccount) {
       _landingToken = new LandingToken(_oracleAddress, address(this));
@@ -55,35 +42,8 @@ contract Protocol is Ownable{
         return address(_landingToken);
     }
 
-    function addProperty(string memory _propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
-        require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
-        _properties[_propertyID].imageCID = imageCID;
-        _properties[_propertyID].legalDocCID = legalDocCID;
-    }
+   
 
-    function getProperty(string memory propertyID) external view returns(PropertyDetail memory) {
-        return _properties[propertyID];
-    }
-
-    // _date => first timestamp of start of the month
-    function payRentLandc(uint256 amount, uint256 _date, string memory _propertyID) external{
-        require(_properties[_propertyID].imageCID.length != 0, "Property do not exist");
-        require(_landingToken.balanceOf(msg.sender) >= amount, "Not enogh balance");
-        _landingToken.payToProtocol(amount, msg.sender);
-        emit PayRentLANDC(msg.sender, _propertyID, amount, _date, block.timestamp);
-    }
-
-    function convertUSDRentToLandc(uint256 usdAmount, string memory rentTxID) external onlyOwner {
-        uint256 mainWaletBalance = _landingToken.balanceOf(address(_landingToken));
-        
-        bool usdPaid = _oracle.checkRentTx(rentTxID, usdAmount);
-        require(usdPaid, "USD not paid");
-        uint256 amount = ((usdAmount*10**36)/(_landingToken.getPrice()));
-        if(mainWaletBalance < amount){
-            _landingToken.mint(amount - mainWaletBalance);
-        }
-        _landingToken.transferFrom(address(_landingToken), address(this), amount);  
-    }
 
     function getHours(uint256 timestamp) internal view returns(uint16) {
         uint256 timeDif = timestamp - _lastTimestampRentDistributed;

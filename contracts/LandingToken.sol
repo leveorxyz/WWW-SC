@@ -30,6 +30,21 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         uint256 usdPaid
     );
 
+    struct PropertyDetail{
+        bytes imageCID;
+        bytes legalDocCID;
+    }
+
+    mapping (string=>PropertyDetail) private _properties;
+
+    event PayRentLANDC(
+        address rentPayer,
+        string propertyID,
+        uint256 amount,
+        uint256 date,
+        uint256 timestamp
+    );
+
     address private _protocolAddress;
 
     constructor(address _oracleAddress, address __protocolAddress) ERC20("Landing Token", "LANDC") {
@@ -138,10 +153,35 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
 
     }
 
-    function payToProtocol(uint256 amount, address rentPayer) external onlyOwner{
-        transferFrom(rentPayer, msg.sender, amount);
-        _approve(rentPayer, msg.sender, this.balanceOf(rentPayer));
+    function addProperty(string memory _propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
+        require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
+        _properties[_propertyID].imageCID = imageCID;
+        _properties[_propertyID].legalDocCID = legalDocCID;
+    }
 
+    function getProperty(string memory propertyID) external view returns(PropertyDetail memory) {
+        return _properties[propertyID];
+    }
+
+    // _date => first timestamp of start of the month
+    function payRentLandc(uint256 amount, uint256 _date, string memory _propertyID) external{
+        require(_properties[_propertyID].imageCID.length != 0, "Property do not exist");
+        require(this.balanceOf(msg.sender) >= amount, "Not enogh balance");
+        transferFrom(msg.sender, _protocolAddress, amount);
+        
+        emit PayRentLANDC(msg.sender, _propertyID, amount, _date, block.timestamp);
+    }
+
+    function convertUSDRentToLandc(uint256 usdAmount, string memory rentTxID) external onlyOwner {
+        uint256 mainWaletBalance = this.balanceOf(address(this));
+        
+        bool usdPaid = _oracle.checkRentTx(rentTxID, usdAmount);
+        require(usdPaid, "USD not paid");
+        uint256 amount = ((usdAmount*10**36)/(this.getPrice()));
+        if(mainWaletBalance < amount){
+            this.mint(amount - mainWaletBalance);
+        }
+        transferFrom(address(this), _protocolAddress, amount);
     }
 
     function getPrice() external view returns(uint256) {
