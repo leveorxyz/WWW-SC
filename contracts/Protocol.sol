@@ -35,10 +35,6 @@ contract Protocol is Ownable{
 
     mapping (string=>PropertyDetail) private _properties;
 
-  
-
-    
-
      event SellLANDC(
         address seller,
         uint256 amount,
@@ -55,7 +51,7 @@ contract Protocol is Ownable{
     );
 
     constructor(address _oracleAddress, uint256 _intialTimestamp, address __masterAccount) {
-      _landingToken = new LandingToken(_oracleAddress);
+      _landingToken = new LandingToken(_oracleAddress, address(this));
       _masterAccount = __masterAccount;
       _oracle = IOracle(_oracleAddress);
       _oracle.initialize(address(_landingToken));

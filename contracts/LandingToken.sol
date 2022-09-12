@@ -23,9 +23,12 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         uint256 usdPaid
     );
 
-    constructor(address _oracleAddress) ERC20("Landing Token", "LANDC") {
+    address private _protocolAddress;
+
+    constructor(address _oracleAddress, address __protocolAddress) ERC20("Landing Token", "LANDC") {
         intialMint = 1000000000000;
         _oracle = IOracle(_oracleAddress);
+        _protocolAddress= __protocolAddress;
         _mint(address(this), intialMint * (10 ** decimals()));
         _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
     }
@@ -53,6 +56,13 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         whenNotPaused
         override
     {
+        if(to != address(0) && to != address(this) && to != _protocolAddress){
+            if (this.balanceOf(to) == 0) {
+                _buyers[to] = block.timestamp;
+                numberOfBuyers++;
+            }
+        }
+        
         // if(from != address(0) && to != address(0)){
         //      if (from != address(this)) {
         //     _approve(from, address(this), this.allowance(from, address(this))-amount);
@@ -78,6 +88,10 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
                 _approve(from, address(this), this.balanceOf(to));
             }
             else{
+              if(from != _protocolAddress && this.balanceOf(from) == 0){
+                numberOfBuyers--;
+                _buyers[from] = 0;
+              }
               _approve(to, address(this), this.balanceOf(from));
               _approve(from, address(this), this.balanceOf(to));
             }
