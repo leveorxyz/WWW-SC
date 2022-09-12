@@ -165,7 +165,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         bool usdPaid = _oracle.checkSellTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
        
-        transferFrom(msg.sender, address(this), amount);
+        this.transferFrom(msg.sender, address(this), amount);
         emit SellLANDC(msg.sender, amount, block.timestamp, usdAmount);
 
     }
