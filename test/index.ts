@@ -108,7 +108,7 @@ describe("Landing token test suite", function () {
       
     });
 
-    it.only("Should sell token", async function () {
+    it("Should sell token", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -136,7 +136,7 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
-    it("Should add new property", async function () {
+    it.only("Should add new property", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
