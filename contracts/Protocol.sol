@@ -34,7 +34,7 @@ contract Protocol is Ownable{
     
 
     constructor(address _oracleAddress, uint256 _intialTimestamp, address __masterAccount) {
-      _landingToken = new LandingToken(_oracleAddress, address(this));
+      _landingToken = new LandingToken(_oracleAddress, address(this), msg.sender);
       _masterAccount = __masterAccount;
       _lastTimestampRentDistributed = _intialTimestamp; // !!! IMPORTANT TO SET THIS RIGHT
     }
@@ -42,14 +42,6 @@ contract Protocol is Ownable{
     modifier onlyMasterAccount() {
         require(msg.sender == _masterAccount, "Not the master account");
         _;
-    }
-
-     function pause() public onlyMasterAccount {
-        _landingToken.pause();
-    }
-
-    function unpause() public onlyMasterAccount {
-        _landingToken.unpause();
     }
 
     function getLandingTokenAddress() public view returns(address) {

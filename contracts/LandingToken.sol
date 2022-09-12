@@ -47,11 +47,13 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
 
     address private _protocolAddress;
 
-    constructor(address _oracleAddress, address __protocolAddress) ERC20("Landing Token", "LANDC") {
+    constructor(address _oracleAddress, address __protocolAddress, address ownerAddress) ERC20("Landing Token", "LANDC") {
         intialMint = 1000000000000;
         _oracle = IOracle(_oracleAddress);
         _protocolAddress= __protocolAddress;
+        _oracle.initialize(address(this));
         _mint(address(this), intialMint * (10 ** decimals()));
+        transferOwnership(ownerAddress);
         // _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
     }
 
@@ -63,15 +65,15 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         _unpause();
     }
 
-    function mint(uint256 amount) public onlyOwner {
+    function mint(uint256 amount) internal {
         intialMint += amount;
         // _approve(address(this), msg.sender, intialMint * (10 ** decimals()));
         _mint(address(this), amount);
     }
 
-     function burn(uint256 amount) public virtual onlyOwner override {
-        _burn(address(this), amount);
-    }
+    //  function burn(uint256 amount) public virtual onlyOwner override {
+    //     _burn(address(this), amount);
+    // }
 
     function approve(address spender, uint256 amount)
         public 
@@ -89,7 +91,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         whenNotPaused
         override
     {
-        if(to != address(0) && to != address(this) && to != _protocolAddress){
+        if(from != address(0) && to != address(0) && to != address(this) && to != _protocolAddress){
             if (this.balanceOf(to) == 0) {
                 _buyers[to] = block.timestamp;
                 numberOfBuyers++;
@@ -123,44 +125,40 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     {
         if(from != address(0) && to != address(0)){
              if (from == address(this)) {
-              _approve(to, address(this), this.balanceOf(from));
+              _approve(to, address(this), this.balanceOf(to));
             } 
             else if(to == address(this)){   
-                _approve(from, address(this), this.balanceOf(to));
+                _approve(from, address(this), this.balanceOf(from));
             }
             else{
               if(from != _protocolAddress && this.balanceOf(from) == 0){
                 numberOfBuyers--;
                 _buyers[from] = 0;
               }
-              _approve(to, address(this), this.balanceOf(from));
-              _approve(from, address(this), this.balanceOf(to));
+              _approve(to, address(this), this.balanceOf(to));
+              _approve(from, address(this), this.balanceOf(from));
             }
         }
        
         super._afterTokenTransfer(from, to, amount);
     }
 
-    function buyLANDC(uint256 usdAmount, string memory txID) external onlyOwner {
+    function buyLANDC(uint256 usdAmount, string memory txID) external {
         uint256 amount = ((usdAmount*10**36)/(this.getPrice()));
         require(this.balanceOf(address(this)) >= amount, "Not enough balance");
 
-        if(this.balanceOf(msg.sender) == 0){
-            _buyers[msg.sender] = block.timestamp;
-            numberOfBuyers+=1;
-        }
         bool usdPaid = _oracle.checkBuyTx(txID, usdAmount);
         require(usdPaid, "USD not paid");
         uint256 burnAmount = ((amount * 4)/100);
         uint256 amountTransferred = amount-burnAmount;
-        this.burn(burnAmount);
+        _burn(address(this), burnAmount);
        
         emit BuyLANDC(msg.sender, amountTransferred, block.timestamp, usdAmount);
-        // _approve(buyer, msg.sender, this.allowance(buyer, msg.sender)+amount);
-        transferFrom(address(this), msg.sender, amount);
+        // _approve(msg.sender, this(address), this.allowance(buyer, msg.sender)+amount);
+        this.transfer(msg.sender, amountTransferred);
     }
 
-    function sellLANDC(uint256 usdAmount, string memory txID) external onlyOwner {
+    function sellLANDC(uint256 usdAmount, string memory txID) external {
         uint256 amount = ((usdAmount*10**36)/(this.getPrice()));
         require(this.balanceOf(msg.sender) >= amount, "Not enough balance");
  
@@ -198,7 +196,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         require(usdPaid, "USD not paid");
         uint256 amount = ((usdAmount*10**36)/(this.getPrice()));
         if(mainWaletBalance < amount){
-            this.mint(amount - mainWaletBalance);
+            mint(amount - mainWaletBalance);
         }
         transferFrom(address(this), _protocolAddress, amount);
     }

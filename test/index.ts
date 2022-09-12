@@ -79,10 +79,11 @@ describe("Landing token test suite", function () {
     it("Should initial supply be be 1000000000000", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const supply = Number(await landingToken.totalSupply()) / (10**18);
+    
       expect(supply).to.eq(1000000000000);
     });
 
-    it("Should buy landc", async function () {
+    it.only("Should buy landc", async function () {
       const { owner, oracle, landingToken } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -91,15 +92,17 @@ describe("Landing token test suite", function () {
       expect(await getPrice(landingToken)).to.eq(1);
       
       expect(await getBalance(landingToken, owner.address)).to.eq(0);
+      expect(await landingToken.getTotalBuyers()).to.eq(0);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(1000000000000);
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.buyLANDC(usdAmount, txID);
+      tx = await landingToken.buyLANDC(usdAmount, txID);
       await tx.wait();
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
+      expect(await landingToken.getTotalBuyers()).to.eq(1);
+
       expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
-      console.log(Number(await landingToken.totalSupply())/10**18);
       
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
       
@@ -111,18 +114,20 @@ describe("Landing token test suite", function () {
       let usdAmount = 100;
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.buyLANDC(usdAmount, txID);
+      tx = await landingToken.buyLANDC(usdAmount, txID);
       await tx.wait();
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
 
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
+      console.log(await landingToken.getTotalBuyers());
+      
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       
       usdAmount = 90;
       tx = await oracle.addSellTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.sellLANDC(1, usdAmount, txID);
+      tx = await landingToken.sellLANDC(usdAmount, txID);
       await tx.wait();
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
       
@@ -132,13 +137,13 @@ describe("Landing token test suite", function () {
     });
 
     it("Should add new property", async function () {
-      const { protocol } = await loadFixture(deployOnceFixture);
+      const { landingToken } = await loadFixture(deployOnceFixture);
       const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
       const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
-      let tx = await protocol.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
+      let tx = await landingToken.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
       await tx.wait();
-      const propertyDetails = await protocol.getProperty(propertyID);
+      const propertyDetails = await landingToken.getProperty(propertyID);
       let resImageID = hex_to_ascii(propertyDetails[0]).toString().replace(/[^\w\s]/gi, '');
       let resDocID = hex_to_ascii(propertyDetails[1]).toString().replace(/[^\w\s]/gi, '');
       expect(resImageID).to.eq(imageID);
@@ -151,13 +156,13 @@ describe("Landing token test suite", function () {
       const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
       const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
-      let tx = await protocol.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
+      let tx = await landingToken.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
       await tx.wait();
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
       tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.buyLANDC(usdAmount, txID);
+      tx = await landingToken.buyLANDC(usdAmount, txID);
       await tx.wait();
 
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
@@ -165,7 +170,7 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
       const sept1stTimestamp  = 1661990400;
       let rentPaid =  ethers.utils.parseUnits("50", "ether");
-      tx = await  protocol.payRentLandc(rentPaid, sept1stTimestamp, propertyID);
+      tx = await  landingToken.payRentLandc(rentPaid, sept1stTimestamp, propertyID);
       await tx.wait();
       expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(46);
      
@@ -183,7 +188,7 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, landingToken.address)).to.eq(1000000000000);
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
       
-      tx = await protocol.convertUSDRentToLandc(usdAmount, txID);
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
       await tx.wait();
 
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
@@ -201,11 +206,11 @@ describe("Landing token test suite", function () {
       
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.buyLANDC(usdAmount, txID);
+      tx = await landingToken.buyLANDC(usdAmount, txID);
       await tx.wait();
       tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.connect(account2).buyLANDC(usdAmount, txID);
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
       await tx.wait();
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999800);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
@@ -216,7 +221,7 @@ describe("Landing token test suite", function () {
       
       tx = await oracle.addRentTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.convertUSDRentToLandc(usdAmount, txID);
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
       await tx.wait();
       expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992);
       
