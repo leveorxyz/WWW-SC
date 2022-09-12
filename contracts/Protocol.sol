@@ -35,13 +35,6 @@ contract Protocol is Ownable{
 
     mapping (string=>PropertyDetail) private _properties;
 
-     event SellLANDC(
-        address seller,
-        uint256 amount,
-        uint256 timestamp,
-        uint256 usdPaid
-    );
-
     event PayRentLANDC(
         address rentPayer,
         string propertyID,

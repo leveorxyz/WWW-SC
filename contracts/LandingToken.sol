@@ -23,6 +23,13 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         uint256 usdPaid
     );
 
+     event SellLANDC(
+        address seller,
+        uint256 amount,
+        uint256 timestamp,
+        uint256 usdPaid
+    );
+
     address private _protocolAddress;
 
     constructor(address _oracleAddress, address __protocolAddress) ERC20("Landing Token", "LANDC") {
@@ -119,10 +126,16 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         transferFrom(address(this), msg.sender, amount);
     }
 
-    function sellToken(uint amount, address seller) external onlyOwner {
-        require(this.balanceOf(seller) >= amount, "Not enough balance");
-        transferFrom(seller, address(this), amount);
-        _approve(seller, msg.sender, this.balanceOf(seller));
+    function sellToken(uint256 usdAmount, string memory txID) external onlyOwner {
+        uint256 amount = ((usdAmount*10**36)/(this.getPrice()));
+        require(this.balanceOf(msg.sender) >= amount, "Not enough balance");
+ 
+        bool usdPaid = _oracle.checkSellTx(txID, usdAmount);
+        require(usdPaid, "USD not paid");
+       
+        transferFrom(msg.sender, address(this), amount);
+        emit SellLANDC(msg.sender, amount, block.timestamp, usdAmount);
+
     }
 
     function payToProtocol(uint256 amount, address rentPayer) external onlyOwner{
