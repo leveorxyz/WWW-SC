@@ -94,11 +94,15 @@ contract Protocol is Ownable{
     }
 
     function getTotalClaimableInMonth(uint256 timestamp) external view returns(uint256){
-        return totalLandcAllocated[msg.sender][timestamp].hoursClaimable * totalLandcAllocated[msg.sender][timestamp].amountPerHour;
+        if(totalLandcAllocated[msg.sender][timestamp].claimSet){
+            return totalLandcAllocated[msg.sender][timestamp].hoursClaimable * totalLandcAllocated[msg.sender][timestamp].amountPerHour;
+        }
+        return totalClaimDetails[timestamp].eachClaimablePerHour*totalClaimDetails[timestamp].hoursInMonth;
     }
 
 
     function getClaimable(uint256 timestamp) public view returns(uint256) {
+        require(totalLandcAllocated[msg.sender][timestamp].claimSet, "Call getTotalClaimableInMonth instead");
         uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
         uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
         uint256 claimedSeconds = totalLandcAllocated[msg.sender][timestamp].hoursClaimed*3600;
