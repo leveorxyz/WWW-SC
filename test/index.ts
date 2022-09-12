@@ -178,7 +178,7 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, protocol.address)).to.eq(50);
     });
 
-    it.only("Should convert usd to landc", async function () {
+    it("Should convert usd to landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -195,8 +195,8 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, protocol.address)).to.eq(100);
     });
 
-    it("Should distribute rent to token holder and claim payouts and fee", async function () {
-      const { owner, otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
+    it.only("Should buy token with two separate account", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       const account2 = otherAccounts[1];
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -218,7 +218,24 @@ describe("Landing token test suite", function () {
 
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
       expect(await getPrice(landingToken)).to.eq(1.000000000008);
+    });
+
+    it("Should distribute rent to token holder and claim payouts and fee", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
       
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
       tx = await oracle.addRentTx(txID, usdAmount);
       await tx.wait();
       tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
