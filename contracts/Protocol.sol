@@ -55,31 +55,6 @@ contract Protocol is Ownable{
         return address(_landingToken);
     }
 
- 
-    // view function to get buyer address
-    function getBuyerIndex() external view returns(bool, uint256) {
-        for (uint256 index = 0; index < buyerAddresses.length; index++) {
-            if (buyerAddresses[index] == msg.sender) {
-                return (true, index);
-            } 
-        }
-        return(false, 0);        
-    }
-
-    function sellLANDC(uint256 userAddressIndex, uint256 usdAmount, string memory txID) external {
-        uint256 amount = ((usdAmount*10**36)/(_landingToken.getPrice()));
-        require(_landingToken.balanceOf(address(msg.sender))>= amount, "Not enough balance");
-        if(_landingToken.balanceOf(msg.sender) == amount){
-            require(buyerAddresses[userAddressIndex] == msg.sender, "Wrong user index");
-            buyerAddresses[userAddressIndex] = buyerAddresses[buyerAddresses.length - 1];
-            buyerAddresses.pop();
-        }
-        bool usdPaid = _oracle.checkSellTx(txID, usdAmount);
-        require(usdPaid, "USD not paid");
-        _landingToken.sellToken(amount, msg.sender);
-        emit SellLANDC(msg.sender, amount, block.timestamp, usdAmount);
-    }
-
     function addProperty(string memory _propertyID, bytes memory imageCID, bytes  memory legalDocCID) external onlyOwner {
         require(_properties[_propertyID].imageCID.length == 0, "Property already exist");
         _properties[_propertyID].imageCID = imageCID;
