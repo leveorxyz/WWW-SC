@@ -141,7 +141,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         super._afterTokenTransfer(from, to, amount);
     }
 
-    function buyToken(uint256 usdAmount, string memory txID) external onlyOwner {
+    function buyLANDC(uint256 usdAmount, string memory txID) external onlyOwner {
         uint256 amount = ((usdAmount*10**36)/(this.getPrice()));
         require(this.balanceOf(address(this)) >= amount, "Not enough balance");
 
@@ -160,7 +160,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         transferFrom(address(this), msg.sender, amount);
     }
 
-    function sellToken(uint256 usdAmount, string memory txID) external onlyOwner {
+    function sellLANDC(uint256 usdAmount, string memory txID) external onlyOwner {
         uint256 amount = ((usdAmount*10**36)/(this.getPrice()));
         require(this.balanceOf(msg.sender) >= amount, "Not enough balance");
  
