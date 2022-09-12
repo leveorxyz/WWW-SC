@@ -184,7 +184,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     function payRentLandc(uint256 amount, uint256 _date, string memory _propertyID) external{
         require(_properties[_propertyID].imageCID.length != 0, "Property do not exist");
         require(this.balanceOf(msg.sender) >= amount, "Not enogh balance");
-        transferFrom(msg.sender, _protocolAddress, amount);
+        this.transferFrom(msg.sender, _protocolAddress, amount);
         
         emit PayRentLANDC(msg.sender, _propertyID, amount, _date, block.timestamp);
     }
