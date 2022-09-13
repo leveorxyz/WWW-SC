@@ -129,6 +129,17 @@ describe("Landing token test suite", function () {
       await tx.wait();
       tx = await landingToken.sellLANDC(usdAmount, txID);
       await tx.wait();
+      /**
+       Buyer spent 100 usd. Initial price was 1 USD = 1 LANDC. 4% was burnt. So user get 96 LANDC and landing token has 999999999900 LANDC and the total supply after the burn is 999999999996.
+      The price is determined by the total minted tokens and current supply:
+      total initially minted: 1000000000000
+      total supply after the buy: 999999999996
+      1000000000000/999999999996 = 1.000000000004
+      So after that having 96 LANDC he then sells 90 USD equivalent LANDC.
+      Price is now 1.000000000004 USD = 1 LANDC
+      90 USD = 90/1.000000000004 LANDC = 89.99999999964001
+      So the balance + the allowance will be: 96 - 89.99999999964001 = 6.000000000359989 (Precision would be a bit off for solidity) 
+      **/
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
       
       expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(6.000000000359999);
