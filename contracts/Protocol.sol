@@ -71,18 +71,21 @@ contract Protocol is Ownable{
     function distributePayment(uint256 rentToDistribute, uint256 maintainiaceAmount, uint256 timestamp) external onlyOwner {
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute+maintainiaceAmount, "Not enough balance in protocol contract");       
         require(block.timestamp>timestamp, "Month have not past");
-        uint16 hoursInMonths = getHours(timestamp);
-        require(hoursInMonths != 0, "Timestamp given is incorrect");
         uint256 totalAddress = _landingToken.getTotalBuyers();
-        uint256 eachClaimablePerHour = (rentToDistribute/totalAddress)/uint256(hoursInMonths);
+        if(rentToDistribute != 0 && maintainiaceAmount !=0 && totalAddress != 0){
+             uint16 hoursInMonths = getHours(timestamp);
+            require(hoursInMonths != 0, "Timestamp given is incorrect");
+            
+            uint256 eachClaimablePerHour = (rentToDistribute/totalAddress)/uint256(hoursInMonths);
 
-        totalClaimDetails[timestamp].eachClaimablePerHour = eachClaimablePerHour;
-        totalClaimDetails[timestamp].hoursInMonth = hoursInMonths;
-        totalClaimDetails[timestamp].totalClaimedSet = block.timestamp;
-        
-        _totalClaimable += rentToDistribute;
-        _maintenanceVaultAmount += maintainiaceAmount;
-        _lastTimestampRentDistributed = timestamp;
+            totalClaimDetails[timestamp].eachClaimablePerHour = eachClaimablePerHour;
+            totalClaimDetails[timestamp].hoursInMonth = hoursInMonths;
+            totalClaimDetails[timestamp].totalClaimedSet = block.timestamp;
+            
+            _totalClaimable += rentToDistribute;
+            _maintenanceVaultAmount += maintainiaceAmount;
+            _lastTimestampRentDistributed = timestamp;     
+        }
     }
 
     function claimMaintenanceFee(uint256 amount) external onlyMasterAccount {

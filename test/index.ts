@@ -563,11 +563,12 @@ describe("Landing token test suite", function () {
       expect(Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
       expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
       expect(Number(await protocol.connect(account3).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(0);
+      expect(Number(await protocol.connect(account3).getClaimable(sept1stTimestamp))/10**18).to.eq(0);
 
 
     });
 
-    it.only("Should not redistribute with wrong timestamp", async function () {
+    it("Should not redistribute with wrong timestamp", async function () {
       const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       const account2 = otherAccounts[1];
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
@@ -605,8 +606,24 @@ describe("Landing token test suite", function () {
       expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
     });
 
-    it("Should ", async function () {
+    it.only("Should allow non payment for a month", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const sept1stTimestamp = 1661990400;
+
+      let tx = await protocol.distributePayment(0, 0, sept1stTimestamp);
+      await tx.wait();
+       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+
+      expect(Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(0);
+      expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
     });
    
     it("Should ", async function () {
