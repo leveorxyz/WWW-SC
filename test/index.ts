@@ -504,7 +504,7 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
-    it.only("Should revert if trying to change allowance for landing token", async function () {
+    it("Should revert if trying to change allowance for landing token", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -521,6 +521,50 @@ describe("Landing token test suite", function () {
       .reverted;
 
       expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
+    });
+
+    it.only("Should not add claimable if user buy token after payout distribution", async function () {
+      const { otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      const account3 = otherAccounts[2];
+
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+      tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
+      
+      const distributionAmount =  ethers.utils.parseUnits("98", "ether");
+      const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
+      const sept1stTimestamp = 1661990400;
+
+ 
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
+      await tx.wait();
+
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account3).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+
+      expect(Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+      expect(Number(await protocol.connect(account3).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(0);
+
+
     });
 
     it("Should ", async function () {

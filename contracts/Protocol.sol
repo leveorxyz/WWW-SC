@@ -102,7 +102,10 @@ contract Protocol is Ownable{
     }
 
     function getTotalClaimableInMonth(uint256 timestamp) external view returns(uint256){
-        if(totalClaimDetails[timestamp].eachClaimablePerHour == 0){
+        if(totalClaimDetails[timestamp].totalClaimedSet == 0){
+            return 0;
+        }
+        if(_landingToken.getBuyer(msg.sender) > totalClaimDetails[timestamp].totalClaimedSet){
             return 0;
         }
         if(totalLandcAllocated[msg.sender][timestamp].claimSet){
@@ -113,7 +116,10 @@ contract Protocol is Ownable{
 
 
     function getClaimable(uint256 timestamp) public view returns(uint256) {
-        if(totalClaimDetails[timestamp].eachClaimablePerHour == 0){
+         if(totalClaimDetails[timestamp].totalClaimedSet == 0){
+            return 0;
+        }
+        if(_landingToken.getBuyer(msg.sender) > totalClaimDetails[timestamp].totalClaimedSet){
             return 0;
         }
         uint256 claimablePerHour;
