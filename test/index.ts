@@ -606,7 +606,7 @@ describe("Landing token test suite", function () {
       expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
     });
 
-    it.only("Should allow non payment for a month", async function () {
+    it("Should allow non payment for a month", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       const sept1stTimestamp = 1661990400;
 
