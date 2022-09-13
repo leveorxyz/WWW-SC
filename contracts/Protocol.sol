@@ -102,6 +102,7 @@ contract Protocol is Ownable{
     }
 
     function getTotalClaimableInMonth(uint256 timestamp) external view returns(uint256){
+        require(totalClaimDetails[timestamp].eachClaimablePerHour != 0, "Rent not allocated");
         if(totalLandcAllocated[msg.sender][timestamp].claimSet){
             return totalLandcAllocated[msg.sender][timestamp].hoursClaimable * totalLandcAllocated[msg.sender][timestamp].amountPerHour;
         }
@@ -110,25 +111,35 @@ contract Protocol is Ownable{
 
 
     function getClaimable(uint256 timestamp) public view returns(uint256) {
+        require(totalClaimDetails[timestamp].eachClaimablePerHour != 0, "Rent not allocated");
+        uint256 claimablePerHour;
+        uint256 hoursClaimable;
+        uint256 claimedSeconds;
+        uint256 hoursPassed;
         if(totalLandcAllocated[msg.sender][timestamp].claimSet){
-            uint256 claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
-            uint256 hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
-            uint256 claimedSeconds = totalLandcAllocated[msg.sender][timestamp].hoursClaimed*3600;
+            claimablePerHour = totalLandcAllocated[msg.sender][timestamp].amountPerHour;
+            hoursClaimable = uint256(totalLandcAllocated[msg.sender][timestamp].hoursClaimable);
+            claimedSeconds = totalLandcAllocated[msg.sender][timestamp].hoursClaimed*3600; 
             if(claimablePerHour == 0 || hoursClaimable == 0 || block.timestamp<timestamp+claimedSeconds){
                 return 0;
             }
-        
-            uint256 hoursPassed = (block.timestamp-timestamp-claimedSeconds)/3600;
-            uint256 totalClaimable = 0;
+            hoursPassed = (block.timestamp-timestamp-claimedSeconds)/3600;
+             uint256 totalClaimable = 0;
             if(hoursPassed >= hoursClaimable){     
                 totalClaimable =  hoursClaimable*claimablePerHour;      
             }
             else{
                 totalClaimable = hoursPassed*claimablePerHour;
             }
-            return totalClaimable;    
+            return totalClaimable;  
+
         }
-        return getClaimableAllocated(timestamp);
+        else{
+            claimablePerHour = totalClaimDetails[timestamp].eachClaimablePerHour;
+            hoursPassed = (block.timestamp-timestamp)/3600;
+            return hoursPassed*claimablePerHour;
+        }
+      
     }
 
     function getTotalSaving() external view onlyOwner returns(uint256) {
@@ -138,7 +149,7 @@ contract Protocol is Ownable{
     function claimLANDC(uint256 timestamp) external{
         TotalClaim memory totalClaimDetail = totalClaimDetails[timestamp];
         require(totalClaimDetail.totalClaimedSet > 0, "Invalid timestamp");
-        require(_landingToken.getBuyer(msg.sender) > totalClaimDetail.totalClaimedSet, "Not eligible to claim");
+        require(_landingToken.getBuyer(msg.sender) < totalClaimDetail.totalClaimedSet, "Not eligible to claim");
         if(!totalLandcAllocated[msg.sender][timestamp].claimSet){
             totalLandcAllocated[msg.sender][timestamp].hoursClaimable = totalClaimDetail.hoursInMonth;
             totalLandcAllocated[msg.sender][timestamp].amountPerHour  = totalClaimDetail.eachClaimablePerHour;
