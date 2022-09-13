@@ -120,7 +120,6 @@ describe("Landing token test suite", function () {
 
       expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
-      console.log(await landingToken.getTotalBuyers());
       
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       
@@ -480,7 +479,7 @@ describe("Landing token test suite", function () {
 
       expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
-      console.log(await landingToken.getTotalBuyers());
+      // console.log(await landingToken.getTotalBuyers());
       
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       const transferAmount =  ethers.utils.parseUnits("90", "ether");
@@ -491,6 +490,7 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, owner.address)).to.eq(6);
       expect(await getBalance(landingToken, account2.address)).to.eq(90);
       expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(6);
+      expect(await getAllowance(landingToken, account2.address, landingToken.address)).to.eq(90);
       
       usdAmount = 90;
       tx = await oracle.addSellTx(txID, usdAmount);
@@ -504,8 +504,9 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
-    it("Should ", async function () {
+    it("Should revert if trying to change allowance for landing token", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+
     });
 
     it("Should ", async function () {
