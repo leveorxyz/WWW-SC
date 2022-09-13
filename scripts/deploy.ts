@@ -16,7 +16,7 @@ async function main() {
 
   console.log("Oracle contract deployed to: ", oracle.address);
   console.log("Protocol contract deployed to: ", protocol.address);
-  console.log(await protocol.functions.getLandingTokenAddress());
+  console.log("Landing token contract deployed to: "+ await protocol.functions.getLandingTokenAddress());
   
 
 }
