@@ -102,7 +102,9 @@ contract Protocol is Ownable{
     }
 
     function getTotalClaimableInMonth(uint256 timestamp) external view returns(uint256){
-        require(totalClaimDetails[timestamp].eachClaimablePerHour != 0, "Rent not allocated");
+        if(totalClaimDetails[timestamp].eachClaimablePerHour == 0){
+            return 0;
+        }
         if(totalLandcAllocated[msg.sender][timestamp].claimSet){
             return totalLandcAllocated[msg.sender][timestamp].hoursClaimable * totalLandcAllocated[msg.sender][timestamp].amountPerHour;
         }
@@ -111,7 +113,9 @@ contract Protocol is Ownable{
 
 
     function getClaimable(uint256 timestamp) public view returns(uint256) {
-        require(totalClaimDetails[timestamp].eachClaimablePerHour != 0, "Rent not allocated");
+        if(totalClaimDetails[timestamp].eachClaimablePerHour == 0){
+            return 0;
+        }
         uint256 claimablePerHour;
         uint256 hoursClaimable;
         uint256 claimedSeconds;
