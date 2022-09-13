@@ -70,7 +70,6 @@ describe("Landing token test suite", function () {
     return Number(await tokenContract.allowance(ownerAddress, spenderAddress))/ 10**18;
   }
 
-  
     it("Should initial price be 1", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const price = Number(await landingToken.getPrice()) / (10**18);
@@ -80,33 +79,30 @@ describe("Landing token test suite", function () {
     it("Should initial supply be be 1000000000000", async function () {
       const { landingToken } = await loadFixture(deployOnceFixture);
       const supply = Number(await landingToken.totalSupply()) / (10**18);
+    
       expect(supply).to.eq(1000000000000);
     });
 
-    it("Should initial allowance for protocol from token contract be 1000000000000", async function () {
-      const { landingToken, protocol } = await loadFixture(deployOnceFixture);
-      const allowance = Number(await landingToken.allowance(landingToken.address, protocol.address)) / (10**18);
-      expect(allowance).to.eq(1000000000000);
-    });
-
-    it.only("Should buy landc", async function () {
-      const { owner, protocol, oracle, landingToken } = await loadFixture(deployOnceFixture);
+    it("Should buy landc", async function () {
+      const { owner, oracle, landingToken } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
       
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(0);
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(0);
       expect(await getPrice(landingToken)).to.eq(1);
       
       expect(await getBalance(landingToken, owner.address)).to.eq(0);
+      expect(await landingToken.getTotalBuyers()).to.eq(0);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(1000000000000);
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.buyLANDC(usdAmount, txID);
+      tx = await landingToken.buyLANDC(usdAmount, txID);
       await tx.wait();
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
-      console.log(Number(await landingToken.totalSupply())/10**18);
+      expect(await landingToken.getTotalBuyers()).to.eq(1);
+
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
       
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
       
@@ -118,34 +114,46 @@ describe("Landing token test suite", function () {
       let usdAmount = 100;
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.buyLANDC(usdAmount, txID);
+      tx = await landingToken.buyLANDC(usdAmount, txID);
       await tx.wait();
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
 
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
+      
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       
       usdAmount = 90;
       tx = await oracle.addSellTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.sellLANDC(1, usdAmount, txID);
+      tx = await landingToken.sellLANDC(usdAmount, txID);
       await tx.wait();
+      /**
+       Buyer spent 100 usd. Initial price was 1 USD = 1 LANDC. 4% was burnt. So user get 96 LANDC and landing token has 999999999900 LANDC and the total supply after the burn is 999999999996.
+      The price is determined by the total minted tokens and current supply:
+      total initially minted: 1000000000000
+      total supply after the buy: 999999999996
+      1000000000000/999999999996 = 1.000000000004
+      So after that having 96 LANDC he then sells 90 USD equivalent LANDC.
+      Price is now 1.000000000004 USD = 1 LANDC
+      90 USD = 90/1.000000000004 LANDC = 89.99999999964001
+      So the balance + the allowance will be: 96 - 89.99999999964001 = 6.000000000359989 (Precision would be a bit off for solidity) 
+      **/
       expect(await getPrice(landingToken)).to.eq(1.000000000004);
       
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(6.000000000359999);
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(6.000000000359999);
       expect(await getBalance(landingToken, owner.address)).to.eq(6.000000000359999);
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
     it("Should add new property", async function () {
-      const { protocol } = await loadFixture(deployOnceFixture);
+      const { landingToken } = await loadFixture(deployOnceFixture);
       const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
       const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
-      let tx = await protocol.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
+      let tx = await landingToken.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
       await tx.wait();
-      const propertyDetails = await protocol.getProperty(propertyID);
+      const propertyDetails = await landingToken.getProperty(propertyID);
       let resImageID = hex_to_ascii(propertyDetails[0]).toString().replace(/[^\w\s]/gi, '');
       let resDocID = hex_to_ascii(propertyDetails[1]).toString().replace(/[^\w\s]/gi, '');
       expect(resImageID).to.eq(imageID);
@@ -158,23 +166,23 @@ describe("Landing token test suite", function () {
       const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
       const legalDocID = "bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq";
-      let tx = await protocol.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
+      let tx = await landingToken.addProperty(propertyID, strToUtf16Bytes(imageID), strToUtf16Bytes(legalDocID));
       await tx.wait();
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
       tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.buyLANDC(usdAmount, txID);
+      tx = await landingToken.buyLANDC(usdAmount, txID);
       await tx.wait();
 
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(96);
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
       const sept1stTimestamp  = 1661990400;
       let rentPaid =  ethers.utils.parseUnits("50", "ether");
-      tx = await  protocol.payRentLandc(rentPaid, sept1stTimestamp, propertyID);
+      tx = await  landingToken.payRentLandc(rentPaid, sept1stTimestamp, propertyID);
       await tx.wait();
-      expect(await getAllowance(landingToken, owner.address, protocol.address)).to.eq(46);
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(46);
      
       expect(await getBalance(landingToken, owner.address)).to.eq(46);
       expect(await getBalance(landingToken, protocol.address)).to.eq(50);
@@ -190,15 +198,15 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, landingToken.address)).to.eq(1000000000000);
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
       
-      tx = await protocol.convertUSDRentToLandc(usdAmount, txID);
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
       await tx.wait();
 
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
       expect(await getBalance(landingToken, protocol.address)).to.eq(100);
     });
 
-    it("Should distribute rent to token holder and claim payouts and fee", async function () {
-      const { owner, otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
+    it("Should buy token with two separate account", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       const account2 = otherAccounts[1];
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
@@ -208,11 +216,11 @@ describe("Landing token test suite", function () {
       
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.buyLANDC(usdAmount, txID);
+      tx = await landingToken.buyLANDC(usdAmount, txID);
       await tx.wait();
       tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.connect(account2).buyLANDC(usdAmount, txID);
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
       await tx.wait();
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999800);
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
@@ -220,10 +228,27 @@ describe("Landing token test suite", function () {
 
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
       expect(await getPrice(landingToken)).to.eq(1.000000000008);
+    });
+
+    it("Should redistribute payout collected from rent", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
       
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
       tx = await oracle.addRentTx(txID, usdAmount);
       await tx.wait();
-      tx = await protocol.convertUSDRentToLandc(usdAmount, txID);
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
       await tx.wait();
       expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992);
       
@@ -240,11 +265,38 @@ describe("Landing token test suite", function () {
 
       const totalClaimable = Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18;
       expect(totalClaimable).to.eq(49);
-      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);     
+      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+    });
+
+    it("Should claim partial payment hourly wise from rent payout", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+      tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
       
+      const distributionAmount =  ethers.utils.parseUnits("98", "ether");
+      const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
+      const sept1stTimestamp = 1661990400;
+
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
+      await tx.wait();
 
       const threeHours = 7 * 24 * 60 * 60;
-      const thirtyOneDays = 31 * 24 * 60 * 60;
+     
       const blockNumBefore = await ethers.provider.getBlockNumber();
       const blockBefore = await ethers.provider.getBlock(blockNumBefore);
       const timestampBefore = blockBefore.timestamp;
@@ -268,20 +320,67 @@ describe("Landing token test suite", function () {
       expect((await getBalance(landingToken, owner.address))).to.be.closeTo(prevBalance+(Number(currentClaimable)/10**18), 0.0001);
 
       expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
+      
+    });
+
+    it("Should claim all token after month passed", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+      tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
+      
+      const distributionAmount =  ethers.utils.parseUnits("98", "ether");
+      const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
+      const sept1stTimestamp = 1661990400;
+
+   
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
+      await tx.wait();
+
+      const totalClaimable = Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18;
+
+      const threeHours = 7 * 24 * 60 * 60;
+      const thirtyOneDays = 31 * 24 * 60 * 60;
+      const blockNumBefore = await ethers.provider.getBlockNumber();
+      const blockBefore = await ethers.provider.getBlock(blockNumBefore);
+
+      await ethers.provider.send('evm_increaseTime', [threeHours]);
+      await ethers.provider.send('evm_mine', []);
+
+      let blockNumAfter = await ethers.provider.getBlockNumber();
+      let blockAfter = await ethers.provider.getBlock(blockNumAfter);
+      let currentClaimable = await protocol.getClaimable(sept1stTimestamp);
+
     
+      tx = await protocol.claimLANDC(sept1stTimestamp);
+      await tx.wait();  
+     
       await ethers.provider.send('evm_increaseTime', [threeHours]);
       await ethers.provider.send('evm_mine', []);
       blockNumAfter = await ethers.provider.getBlockNumber();
       blockAfter = await ethers.provider.getBlock(blockNumAfter);
-      const timestampAfter2 = blockAfter.timestamp;
-  
-      expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.be.closeTo(perHourClaimable*Math.floor((timestampAfter2-timestampAfter)/3600), 0.0001);
-      
+   
+     
       await ethers.provider.send('evm_increaseTime', [thirtyOneDays]);
       await ethers.provider.send('evm_mine', []);
       blockNumAfter = await ethers.provider.getBlockNumber();
       blockAfter = await ethers.provider.getBlock(blockNumAfter);
-      const timestampAfterfinal = blockAfter.timestamp;
+   
       expect(totalClaimable-(Number(currentClaimable)/10**18)).to.be.closeTo(Number(await protocol.getClaimable(sept1stTimestamp))/10**18, 0.0001);
       
       tx = await protocol.claimLANDC(sept1stTimestamp);
@@ -295,9 +394,67 @@ describe("Landing token test suite", function () {
 
       expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
       expect(Number(await protocol.connect(account2).getClaimable(sept1stTimestamp))/10**18).to.eq(0);
+    });
+   
 
-      expect(Number(await protocol.connect(masterAccount).getMaintenanceFee())/10**18).to.eq(1);
+    it("Should distribute rent for maintenance", async function () {
+      const { otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
 
+      tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
+      
+      const distributionAmount =  ethers.utils.parseUnits("98", "ether");
+      const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
+      const sept1stTimestamp = 1661990400;
+
+ 
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
+      await tx.wait();
+
+      const threeHours = 7 * 24 * 60 * 60;
+      const thirtyOneDays = 31 * 24 * 60 * 60;
+
+
+      await ethers.provider.send('evm_increaseTime', [threeHours]);
+      await ethers.provider.send('evm_mine', []);
+
+      let blockNumAfter = await ethers.provider.getBlockNumber();
+      let blockAfter = await ethers.provider.getBlock(blockNumAfter);
+
+      tx = await protocol.claimLANDC(sept1stTimestamp);
+      await tx.wait();  
+   
+      await ethers.provider.send('evm_increaseTime', [threeHours]);
+      await ethers.provider.send('evm_mine', []);
+      blockNumAfter = await ethers.provider.getBlockNumber();
+      blockAfter = await ethers.provider.getBlock(blockNumAfter);
+  
+    
+      await ethers.provider.send('evm_increaseTime', [thirtyOneDays]);
+      await ethers.provider.send('evm_mine', []);
+      blockNumAfter = await ethers.provider.getBlockNumber();
+      blockAfter = await ethers.provider.getBlock(blockNumAfter);
+     
+      tx = await protocol.claimLANDC(sept1stTimestamp);
+      await tx.wait();
+      tx = await protocol.connect(account2).claimLANDC(sept1stTimestamp);
+      await tx.wait();
+      
       expect(await getBalance(landingToken, masterAccount.address)).to.eq(0);
       let amnt =  ethers.utils.parseUnits("1", "ether");
       await expect(protocol.connect(account2).claimMaintenanceFee(amnt)).to.be
@@ -309,9 +466,170 @@ describe("Landing token test suite", function () {
 
     });
 
+    it("Should sell token if transferred to another account", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      const account2 = otherAccounts[1];
+      let usdAmount = 100;
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      expect(await getPrice(landingToken)).to.eq(1.000000000004);
+
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
+      expect(await getBalance(landingToken, owner.address)).to.eq(96);
+      // console.log(await landingToken.getTotalBuyers());
+      
+      expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999900);
+      const transferAmount =  ethers.utils.parseUnits("90", "ether");
+
+      tx = await landingToken.transfer(account2.address, transferAmount);
+      await tx.wait();
+
+      expect(await getBalance(landingToken, owner.address)).to.eq(6);
+      expect(await getBalance(landingToken, account2.address)).to.eq(90);
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(6);
+      expect(await getAllowance(landingToken, account2.address, landingToken.address)).to.eq(90);
+      
+      usdAmount = 90;
+      tx = await oracle.addSellTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).sellLANDC(usdAmount, txID);
+      await tx.wait();
+      expect(await getPrice(landingToken)).to.eq(1.000000000004);
+      
+      expect(await getAllowance(landingToken, account2.address, landingToken.address)).to.closeTo(0.000000000359999, 0.0001);
+      expect(await getBalance(landingToken, account2.address)).to.closeTo(0.000000000359999, 0.0001);
+      expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
+    });
+
+    it("Should revert if trying to change allowance for landing token", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
+
+      const amount =  ethers.utils.parseUnits("1", "ether");
+
+      await expect(landingToken.approve(landingToken.address, amount)).to.be
+      .reverted;
+
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
+    });
+
+    it("Should not add claimable if user buy token after payout distribution", async function () {
+      const { otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      const account3 = otherAccounts[2];
+
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+      tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
+      
+      const distributionAmount =  ethers.utils.parseUnits("98", "ether");
+      const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
+      const sept1stTimestamp = 1661990400;
+
+ 
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
+      await tx.wait();
+
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account3).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+
+      expect(Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+      expect(Number(await protocol.connect(account3).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(0);
+      expect(Number(await protocol.connect(account3).getClaimable(sept1stTimestamp))/10**18).to.eq(0);
+
+
+    });
+
+    it("Should not redistribute with wrong timestamp", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+      tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
+      expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992);
+      
+      const distributionAmount =  ethers.utils.parseUnits("98", "ether");
+      const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
+      const sept1stTimestamp = 1661990400;
+
+  
+      await expect(protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp+1)).to.be
+      .reverted;
+      
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
+      await tx.wait();
+
+      const totalClaimable = Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18;
+      expect(totalClaimable).to.eq(49);
+      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+    });
+
+    it("Should allow non payment for a month", async function () {
+      const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const sept1stTimestamp = 1661990400;
+
+      let tx = await protocol.distributePayment(0, 0, sept1stTimestamp);
+      await tx.wait();
+       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+
+      expect(Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(0);
+      expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
+    });
+
     it("Should ", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
     });
+   
    
 
   });
