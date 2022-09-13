@@ -523,7 +523,7 @@ describe("Landing token test suite", function () {
       expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
     });
 
-    it.only("Should not add claimable if user buy token after payout distribution", async function () {
+    it("Should not add claimable if user buy token after payout distribution", async function () {
       const { otherAccounts, landingToken, protocol, oracle, masterAccount } = await loadFixture(deployOnceFixture);
       const account2 = otherAccounts[1];
       const account3 = otherAccounts[2];
@@ -567,10 +567,48 @@ describe("Landing token test suite", function () {
 
     });
 
+    it.only("Should not redistribute with wrong timestamp", async function () {
+      const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
+      const account2 = otherAccounts[1];
+      let txID = "6pRNASCoBOKtIshFeQd4XMUh";
+      let usdAmount = 100;
+  
+      
+      let tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+      tx = await oracle.addBuyTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.connect(account2).buyLANDC(usdAmount, txID);
+      await tx.wait();
+
+      tx = await oracle.addRentTx(txID, usdAmount);
+      await tx.wait();
+      tx = await landingToken.convertUSDRentToLandc(usdAmount, txID);
+      await tx.wait();
+      expect(await getBalance(landingToken, protocol.address)).to.eq(99.9999999992);
+      
+      const distributionAmount =  ethers.utils.parseUnits("98", "ether");
+      const maintenanceAmount =  ethers.utils.parseUnits("1", "ether");
+      const sept1stTimestamp = 1661990400;
+
+  
+      await expect(protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp+1)).to.be
+      .reverted;
+      
+      tx = await protocol.distributePayment(distributionAmount, maintenanceAmount, sept1stTimestamp);
+      await tx.wait();
+
+      const totalClaimable = Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18;
+      expect(totalClaimable).to.eq(49);
+      expect(Number(await protocol.connect(account2).getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(49);
+    });
+
     it("Should ", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
     });
-
+   
     it("Should ", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
     });
