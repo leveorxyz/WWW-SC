@@ -10,7 +10,25 @@ contract Oracle is Ownable{
     // txID -> usd amount
     mapping(string => uint256) private _buyUSDTxIDs;       
     mapping (string => uint256) private _sellUSDTxIDs;       
-    mapping (string => uint256) private _rentUSDTxIDs;       
+    mapping (string => uint256) private _rentUSDTxIDs;     
+
+    event AddBuyTx(
+        string txID,
+        uint256 amount,
+        uint256 timestamp
+    );
+
+    event AddSellTx(
+        string txID,
+        uint256 amount,
+        uint256 timestamp
+    );
+
+    event AddRentTx(
+        string txID,
+        uint256 amount,
+        uint256 timestamp
+    );
 
     address private _erc20Address; 
 
@@ -51,14 +69,19 @@ contract Oracle is Ownable{
 
     function addBuyTx(string memory buyUSDTx, uint256 amount) external onlyOwner buyUsdTxIDDontExixt(buyUSDTx) amountNotZero(amount){
         _buyUSDTxIDs[buyUSDTx] = amount;
+        emit AddBuyTx(buyUSDTx, amount, block.timestamp);
     }
 
     function addSellTx(string memory sellUSDTx, uint256 amount) external onlyOwner sellUsdTxIDDontExixt(sellUSDTx) amountNotZero(amount){ 
         _sellUSDTxIDs[sellUSDTx] = amount;
+        emit AddSellTx(sellUSDTx, amount, block.timestamp);
+
     }
 
     function addRentTx(string memory rentUSDTx, uint256 amount) external onlyOwner rentUsdTxIDDontExixt(rentUSDTx) amountNotZero(amount){ 
         _rentUSDTxIDs[rentUSDTx] = amount;
+        emit AddRentTx(rentUSDTx, amount, block.timestamp);
+
     }
 
     function checkBuyTx(string memory buyUSDTx, uint256 amount) external onlyERC20 amountNotZero(amount) returns(bool) {

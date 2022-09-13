@@ -625,10 +625,11 @@ describe("Landing token test suite", function () {
       expect(Number(await protocol.getTotalClaimableInMonth(sept1stTimestamp))/10**18).to.eq(0);
       expect(Number(await protocol.getClaimable(sept1stTimestamp))/10**18).to.eq(0);
     });
-   
+
     it("Should ", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
     });
+   
    
 
   });
