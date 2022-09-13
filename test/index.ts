@@ -230,7 +230,7 @@ describe("Landing token test suite", function () {
       expect(await getPrice(landingToken)).to.eq(1.000000000008);
     });
 
-    it.only("Should redistribute payout collected from rent", async function () {
+    it("Should redistribute payout collected from rent", async function () {
       const { owner, otherAccounts, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       const account2 = otherAccounts[1];
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
@@ -504,18 +504,23 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, landingToken.address)).to.eq(999999999990);
     });
 
-    it("Should revert if trying to change allowance for landing token", async function () {
+    it.only("Should revert if trying to change allowance for landing token", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       let txID = "6pRNASCoBOKtIshFeQd4XMUh";
       let usdAmount = 100;
       let tx = await oracle.addBuyTx(txID, usdAmount);
       await tx.wait();
+      tx = await landingToken.buyLANDC(usdAmount, txID);
+      await tx.wait();
+
       expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
 
       const amount =  ethers.utils.parseUnits("1", "ether");
 
       await expect(landingToken.approve(landingToken.address, amount)).to.be
       .reverted;
+
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(96);
     });
 
     it("Should ", async function () {
