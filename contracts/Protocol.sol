@@ -68,14 +68,15 @@ contract Protocol is Ownable{
     }
 
     // !!! Timestamp should be 12 am first day of the Month
-    function distributePayment(uint256 rentToDistribute, uint256 maintainiaceAmount, uint256 timestamp) external onlyOwner {
+     function distributePayment(uint256 rentToDistribute, uint256 maintainiaceAmount, uint256 timestamp) external onlyOwner {
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute+maintainiaceAmount, "Not enough balance in protocol contract");       
         require(block.timestamp>timestamp, "Month have not past");
         uint256 totalAddress = _landingToken.getTotalBuyers();
+         uint16 hoursInMonths = getHours(timestamp);
+        require(hoursInMonths != 0, "Timestamp given is incorrect");
+        _lastTimestampRentDistributed = timestamp;     
         if(rentToDistribute != 0 && totalAddress != 0){
-             uint16 hoursInMonths = getHours(timestamp);
-            require(hoursInMonths != 0, "Timestamp given is incorrect");
-            
+
             uint256 eachClaimablePerHour = (rentToDistribute/totalAddress)/uint256(hoursInMonths);
 
             totalClaimDetails[timestamp].eachClaimablePerHour = eachClaimablePerHour;
@@ -84,7 +85,6 @@ contract Protocol is Ownable{
             
             _totalClaimable += rentToDistribute;
             _maintenanceVaultAmount += maintainiaceAmount;
-            _lastTimestampRentDistributed = timestamp;     
         }
     }
 

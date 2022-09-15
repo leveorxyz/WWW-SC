@@ -161,7 +161,7 @@ describe("Landing token test suite", function () {
     });
 
 
-    it.only("Should pay rent in landc", async function () {
+    it("Should pay rent in landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
