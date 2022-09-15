@@ -116,7 +116,9 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
         return _buyers[addressToCheck];
     }
 
-    
+    function getAllBuyersAddress() public view  returns(address [] memory){
+        return allBuyers;
+    }
 
     function getTotalBuyers() public view returns(uint256) {
         return numberOfBuyers;
