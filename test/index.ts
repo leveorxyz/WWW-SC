@@ -161,7 +161,7 @@ describe("Landing token test suite", function () {
     });
 
 
-    it("Should pay rent in landc", async function () {
+    it.only("Should pay rent in landc", async function () {
       const { owner, landingToken, protocol, oracle } = await loadFixture(deployOnceFixture);
       const propertyID = "fhdsfhue55";
       const imageID = "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR";
@@ -179,13 +179,23 @@ describe("Landing token test suite", function () {
       expect(await getBalance(landingToken, owner.address)).to.eq(96);
       expect(await getBalance(landingToken, protocol.address)).to.eq(0);
       const sept1stTimestamp  = 1661990400;
-      let rentPaid =  ethers.utils.parseUnits("50", "ether");
+      let rentPaid =  ethers.utils.parseUnits("20", "ether");
       tx = await  landingToken.payRentLandc(rentPaid, sept1stTimestamp, propertyID);
       await tx.wait();
-      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(46);
+      
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(76);
      
-      expect(await getBalance(landingToken, owner.address)).to.eq(46);
-      expect(await getBalance(landingToken, protocol.address)).to.eq(50);
+      expect(await getBalance(landingToken, owner.address)).to.eq(76);
+      expect(await getBalance(landingToken, protocol.address)).to.eq(20);
+
+      rentPaid =  ethers.utils.parseUnits("50", "ether");
+      tx = await  landingToken.payRentLandc(rentPaid, sept1stTimestamp, propertyID);
+      await tx.wait();
+
+      expect(await getAllowance(landingToken, owner.address, landingToken.address)).to.eq(26);
+     
+      expect(await getBalance(landingToken, owner.address)).to.eq(26);
+      expect(await getBalance(landingToken, protocol.address)).to.eq(70);
     });
 
     it("Should convert usd to landc", async function () {

@@ -72,7 +72,7 @@ contract Protocol is Ownable{
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+rentToDistribute+maintainiaceAmount, "Not enough balance in protocol contract");       
         require(block.timestamp>timestamp, "Month have not past");
         uint256 totalAddress = _landingToken.getTotalBuyers();
-        if(rentToDistribute != 0 && maintainiaceAmount !=0 && totalAddress != 0){
+        if(rentToDistribute != 0 && totalAddress != 0){
              uint16 hoursInMonths = getHours(timestamp);
             require(hoursInMonths != 0, "Timestamp given is incorrect");
             
