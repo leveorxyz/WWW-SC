@@ -13,6 +13,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
 
     mapping (address=>uint256) private _buyers;
     uint256 numberOfBuyers;
+    address [] allBuyers;
   
     IOracle private _oracle;
 
@@ -95,6 +96,7 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
             if (this.balanceOf(to) == 0) {
                 _buyers[to] = block.timestamp;
                 numberOfBuyers++;
+                allBuyers.push(to);
             }
         }
         
@@ -113,6 +115,8 @@ contract LandingToken is ERC20, ERC20Burnable, Pausable, Ownable {
     function getBuyer(address addressToCheck) public view returns(uint256) {
         return _buyers[addressToCheck];
     }
+
+    
 
     function getTotalBuyers() public view returns(uint256) {
         return numberOfBuyers;
