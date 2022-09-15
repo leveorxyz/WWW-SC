@@ -100,6 +100,8 @@ contract Protocol is Ownable{
             totalLandcAllocated[buyer][timestamp].hoursClaimed  = 0;
             totalLandcAllocated[buyer][timestamp].claimSet = false; 
         } 
+        _totalClaimable = 0;
+        _maintenanceVaultAmount=0;
     }
 
     function claimMaintenanceFee(uint256 amount) external onlyMasterAccount {
