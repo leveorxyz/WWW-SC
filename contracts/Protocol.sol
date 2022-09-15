@@ -88,6 +88,20 @@ contract Protocol is Ownable{
         }
     }
 
+    function reset(uint256 timestamp) public {
+        totalClaimDetails[timestamp].eachClaimablePerHour = 0;
+        totalClaimDetails[timestamp].hoursInMonth = 0;
+        totalClaimDetails[timestamp].totalClaimedSet = 0;
+        address [] memory allBuyers = _landingToken.getAllBuyersAddress();
+        for (uint256 index = 0; index < allBuyers.length; index++) {
+            address buyer = allBuyers[index];
+            totalLandcAllocated[buyer][timestamp].hoursClaimable = 0;
+            totalLandcAllocated[buyer][timestamp].amountPerHour  = 0;
+            totalLandcAllocated[buyer][timestamp].hoursClaimed  = 0;
+            totalLandcAllocated[buyer][timestamp].claimSet = false; 
+        } 
+    }
+
     function claimMaintenanceFee(uint256 amount) external onlyMasterAccount {
         require(amount <= _maintenanceVaultAmount, "Not enough maintenance fee to collect");
         require(_landingToken.balanceOf(address(this)) >= _totalClaimable+_maintenanceVaultAmount, "Not enough balance in protocol contract");       
